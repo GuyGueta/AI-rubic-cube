@@ -58,8 +58,20 @@ def adjust_params(reset=False, use_exp_fn=False):
         ALPHA = ALPHA / 2
         EPSILON = EPSILON / 2
 
+def setup_gui(level=0):
+    INITIAL_STATE = CREATE_INITIAL_STATE(level=level)
+    init_actions = INITIAL_STATE.init_move_list
+    # CREATE GUI
+    gui_cube = Cube(N)
+    gui_cube.init_actions = init_actions
 
-def setup(actions, level=0, use_exp_fn=False):
+    gui_cube.draw_interactive()
+    gui_cube.INITIAL_STATE = INITIAL_STATE
+    plt.show()
+    return gui_cube
+
+
+def setup(initial_state, actions, level=0, use_exp_fn=False):
     """ Basic setting up of global vars"""
     global ACTIONS, USE_EXPLORATION_FUNCTION
     global Terminal_state, INITIAL_STATE, Q_VALUES
@@ -68,8 +80,8 @@ def setup(actions, level=0, use_exp_fn=False):
     ACTIONS = actions
     USE_EXPLORATION_FUNCTION = use_exp_fn
     Terminal_state = State(n=N)
-    INITIAL_STATE = CREATE_INITIAL_STATE(level=level)
-    init_actions = INITIAL_STATE.init_move_list
+    INITIAL_STATE = initial_state
+    # init_actions = INITIAL_STATE.init_move_list
 
     Q_VALUES = {}
     FEATURES = FEATURES_LIST[N]
@@ -80,12 +92,12 @@ def setup(actions, level=0, use_exp_fn=False):
     adjust_params(reset=True, use_exp_fn=USE_EXPLORATION_FUNCTION)
 
 
-    # CREATE GUI
-    gui_cube = Cube(N)
-    gui_cube.init_actions = init_actions
-
-    gui_cube.draw_interactive()
-    plt.show()
+    # # CREATE GUI
+    # gui_cube = Cube(N)
+    # gui_cube.init_actions = init_actions
+    #
+    # gui_cube.draw_interactive()
+    # plt.show()
 
 def q_learning_driver(initial_state, n_transitions, n_repeats,
                       end_early=False, verbose=False):
@@ -94,6 +106,8 @@ def q_learning_driver(initial_state, n_transitions, n_repeats,
     updating Q values each time.
 
     """
+    # initial_state = INITIAL_STATE
+    setup(initial_state, actions=OPERATORS_180, level=LEVEL, use_exp_fn=True)
     print("PARAMETERS:\nALPHA: {}; EPSILON: {}, GAMMA: {}\nLiving reward: {}".format(ALPHA, EPSILON, GAMMA, LIVING_REWARD))
     for _ in range(1):
         s = initial_state
@@ -131,7 +145,7 @@ def q_learning_driver(initial_state, n_transitions, n_repeats,
         print_solution_path(path)
     elif n_repeats == 0:
         print("Did not converge before ran out of repeats.")
-
+    return path
 
 def choose_action(s, verbose=False):
     """Given a state, decides on the next action to take.
@@ -358,8 +372,10 @@ def check_convergence(path):
 
 
 if __name__ == "__main__":
-    setup(actions=OPERATORS_180, level=LEVEL, use_exp_fn=True)
-    print(INITIAL_STATE)
+    gui_cube = setup_gui(level=LEVEL)
+    a = 5
+    # setup(actions=OPERATORS_180, level=LEVEL, use_exp_fn=True)
+    # print(INITIAL_STATE)
 
     # q_learning_driver(INITIAL_STATE, n_transitions=N_TRANS,
     #                   n_repeats=N_REPEATS, verbose=False)

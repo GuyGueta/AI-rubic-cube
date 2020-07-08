@@ -99,7 +99,7 @@ class Cube:
 
         self._move_list = []
         self._initialize_arrays()
-
+        self.INITIAL_STATE= ""
     def _initialize_arrays(self):
         # initialize centroids, faces, and stickers.  We start with a
         # base for each one, and then translate & rotate them into position.
@@ -219,6 +219,7 @@ class InteractiveCube(plt.Axes):
         self._start_rot = Quaternion.from_v_theta((1, -1, 0),
                                                   -np.pi / 6)
         self.init_actions = cube.init_actions
+
         if fig is None:
             fig = plt.gcf()
 
@@ -364,13 +365,34 @@ class InteractiveCube(plt.Axes):
             self.rotate_face(face, n, layer, steps=3)
 
     def _solve_cube(self, *args):
-        q_learning_driver(INITIAL_STATE, n_transitions=N_TRANS, n_repeats=N_REPEATS, verbose=False)
+        path2solution = q_learning_driver(self.cube.INITIAL_STATE, n_transitions=N_TRANS, n_repeats=N_REPEATS, verbose=False)
+        move_list = []
+
+        for s, a, q in path2solution:
+
+            if a.name == 'Rotate 180' + "'" + 'F':
+                move_list.append(('F', 2,0))
+
+            elif a.name == 'Rotate 180' + "'" + 'U':
+                    move_list.append(('U', 2, 0))
+
+            elif a.name == 'Rotate 180' + "'" + "D":
+                move_list.append(('D', 2, 0))
+
+            elif a.name == 'Rotate 180' + "'" + 'L':
+                move_list.append(('L', 2, 0))
+
+            elif a.name == 'Rotate 180' + "'" + 'R':
+                move_list.append(('R', 2, 0))
+
+            elif a.name == 'Rotate 180' + "'" 'B':
+                move_list.append(('B', 2, 0))
 
         # move_list = self.cube._move_list[:]
         #
-        # for (face, n, layer) in move_list[::-1]:
-        #     self.rotate_face(face, -n, layer, steps=3)
-        # self.cube._move_list = []
+        for (face, n, layer) in move_list:
+            self.rotate_face(face, n, layer, steps=3)
+        self.cube._move_list = []
 
     def _key_press(self, event):
         """Handler for key press events"""
