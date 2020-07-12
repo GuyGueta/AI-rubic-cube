@@ -1,7 +1,9 @@
 # Rubik Cube - AI project
 
 To run the project, run the cube_interactive file.
+
 press "create cube" button to scramble the cube.
+
 press "solve cube" button to solve the cube using IDA.
 
 ## Important note
