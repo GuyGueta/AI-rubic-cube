@@ -82,6 +82,8 @@ def check_repeat_frontier(state, frontier):
 
 
 def ida(init_state):
+    # todo why we calculating h in the rote node.
+
     init_state.h = corner_edge_sum_max(init_state.cube)
     cost_limit = init_state.h
     expended_nodes = 0
@@ -137,15 +139,15 @@ def calculate_distance(c1, c2):
 
 
 def manhattan_distance(cube, i, z, corner):
-    c1 = array[i, z]
+    c1 = cube_array[i, z]
     center = None
     for c in [1, 4, 7, 10, 13, 16]:
-        if cube[i, z] == cube[c, 1]:
+        if cube[i, z] == cube[c, 1]: # checks the colors, to know in which side of the original cube to compere to
             center = c
             break
 
     if corner:
-        c2_list = [array[center - 1, 0], array[center - 1, 2], array[center + 1, 0], array[center + 1, 2]]
+        c2_list = [cube_array[center - 1, 0], cube_array[center - 1, 2], cube_array[center + 1, 0], cube_array[center + 1, 2]]
         d = []
         for c2 in c2_list:
             d.append(calculate_distance(c1, c2))
@@ -153,7 +155,7 @@ def manhattan_distance(cube, i, z, corner):
         return min(d)
 
     else:
-        c2_list = [array[center - 1, 1], array[center, 0], array[center, 2], array[center + 1, 1]]
+        c2_list = [cube_array[center - 1, 1], cube_array[center, 0], cube_array[center, 2], cube_array[center + 1, 1]]
         d = []
         for c2 in c2_list:
             d.append(calculate_distance(c1, c2))
@@ -161,6 +163,9 @@ def manhattan_distance(cube, i, z, corner):
         return min(d)
 
 
+""" for every cubie in the cube, the algorithm checks is color, goes to the border of that color in the initial cube 
+ and and calculate the Manhatten dist by the numbers ( its the cord from 0- 2 in the border) from the border in the 
+ current cube """
 def corner_edge_sum_max(cube):
     corners = 0
     edges = 0
@@ -175,24 +180,23 @@ def corner_edge_sum_max(cube):
 
 
 # todo: change this array to make it look better
-array = np.array([
-    [[0, 0, 2], [1, 0, 2], [2, 0, 2]],
-    [[0, 0, 1], [1, 0, 1], [2, 0, 1]],
-    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
-    [[0, 0, 2], [0, 1, 2], [0, 2, 2]],
-    [[0, 0, 1], [0, 1, 1], [0, 2, 1]],
-    [[0, 0, 0], [0, 1, 0], [0, 2, 0]],
-    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],
-    [[0, 1, 0], [1, 1, 0], [2, 1, 0]],
-    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],
-    [[2, 0, 0], [2, 0, 1], [2, 0, 2]],
-    [[2, 1, 0], [2, 1, 1], [2, 1, 2]],
-    [[2, 2, 0], [2, 2, 1], [2, 2, 2]],
-    [[2, 0, 2], [1, 0, 2], [0, 0, 2]],
-    [[2, 1, 2], [1, 1, 2], [0, 1, 2]],
-    [[2, 2, 2], [1, 2, 2], [0, 2, 2]],
-    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],
-    [[0, 2, 1], [1, 2, 1], [2, 2, 1]],
-    [[0, 2, 2], [1, 2, 2], [2, 2, 2]],
+cube_array = np.array([
+    [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
+    [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
+    [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
+    [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
+    [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
+    [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
 ])
-
