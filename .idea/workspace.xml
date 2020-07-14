@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="68fbb84f-bcef-4ca6-a321-66eb9c8e005a" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1efuykVkHhXNaHkmRnfOquwQsAR" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="Before pull2">
+      <created>1594725400146</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1594725400146</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Before pull3">
+      <created>1594725530035</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1594725530035</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Before pull" />
+    <MESSAGE value="Before pull2" />
+    <MESSAGE value="Before pull3" />
+    <option name="LAST_COMMIT_MESSAGE" value="Before pull3" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="291" y="3" key="CommitChangelistDialog2" timestamp="1594725529191">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="291" y="3" key="CommitChangelistDialog2/0.0.1707.920@0.0.1707.920" timestamp="1594725529191" />
+    <state x="493" y="222" key="MultipleFileMergeDialog" timestamp="1594725329443">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="493" y="222" key="MultipleFileMergeDialog/0.0.1707.920@0.0.1707.920" timestamp="1594725329443" />
+    <state x="93" y="93" width="1521" height="735" key="ShowDiffWithBranchDialog" timestamp="1594725715177">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="93" y="93" width="1521" height="735" key="ShowDiffWithBranchDialog/0.0.1707.920@0.0.1707.920" timestamp="1594725715177" />
+    <state x="446" y="194" key="Vcs.Push.Dialog.v2" timestamp="1594725587802">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="446" y="194" key="Vcs.Push.Dialog.v2/0.0.1707.920@0.0.1707.920" timestamp="1594725587802" />
+    <state x="538" y="249" key="git4idea.merge.GitPullDialog" timestamp="1594725433993">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="538" y="249" key="git4idea.merge.GitPullDialog/0.0.1707.920@0.0.1707.920" timestamp="1594725433993" />
+  </component>
+</project>
