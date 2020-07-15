@@ -178,6 +178,49 @@ def corner_edge_sum_max(cube):
     return max(corners / 12, edges / 8)
 
 
+def corner_edge_sum_divide_by_4(cube):
+    max_corners = 0
+    max_edges = 0
+    for i in range(18):
+        temp_corers = 0
+        temp_edges = 0
+        if i % 3 == 0 or i % 3 == 2:
+            max_corners = max_corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            max_edges = max_edges + manhattan_distance(cube, i, 1, False)
+        else:
+            max_edges = max_edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+
+
+def kurf_h(cube):
+    corners = 0
+    edges_1 = 0
+    edges_2 = 0
+    for i in range(18):
+        if i % 3 == 0 or i % 3 == 2:
+            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            if i % 3 == 0:
+                edges_1 = edges_1 + manhattan_distance(cube, i, 1, False)
+            else:
+                edges_2 = edges_2 + manhattan_distance(cube, i, 1, False)
+
+        else:
+            edges_1 = edges_1 + manhattan_distance(cube, i, 0, False)
+            edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
+    return max(corners, edges_1, edges_2)
+
+def sum_divided_by_eight(cube):
+    corners = 0
+    edges = 0
+    for i in range(18):
+        if i % 3 == 0 or i % 3 == 2:
+            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            edges = edges + manhattan_distance(cube, i, 1, False)
+        else:
+            edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+    return (corners + edges) / 8
+
+
+
 
 # todo: change this array to make it look better
 cube_array = np.array([
