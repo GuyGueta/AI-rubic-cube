@@ -1,8 +1,36 @@
-from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube
+from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube, PrintCube
 import numpy as np
 from datetime import datetime
 import time
 import matplotlib.pyplot as plt
+
+
+def read_cube_from_file(cur_cube, cube_file='input1.txt'):
+    cube_to_create = open(cube_file)
+    indexes = [0, 1, 2, 3, 6, 9, 12, 4, 7, 10, 13, 5, 8, 11, 14, 15, 16, 17]
+    index = 0
+    for line in cube_to_create:
+        line = line.replace(' ', '')
+        for row in line.split('['):
+            if len(row) != 0:
+                i = indexes[index]
+                cur_cube.cube[i, 0] = row[1]
+                cur_cube.cube[i, 1] = row[4]
+                cur_cube.cube[i, 2] = row[7]
+                index = index + 1
+
+
+def run_without_gui(from_file=None):
+    if from_file:
+        N = 3
+        curr = State()
+        curr.cube = np.array(basic_cube)
+        read_cube_from_file(curr, cube_file='input1.txt')
+        PrintCube(curr.cube)
+    else:
+        curr, move_list = init_cube()
+
+    path2solution = ida_solve_cube(curr)
 
 
 def init_cube(number_of_scrambles=5):
@@ -19,7 +47,7 @@ def ida_solve_cube(curr):
     fmt = '%H:%M:%S'
     start = time.strftime(fmt)
 
-    path_to_solution = ida(curr)
+    path_to_solution = ida(curr, sum_divided_by_eight)
     path_for_gui = translate_path_for_gui(path_to_solution)
     print("path to solution", path_to_solution)
 
@@ -81,10 +109,11 @@ def check_repeat_frontier(state, frontier):
     return False
 
 
-def ida(init_state):
+def ida(init_state, heuristic):
+    # corner_edge_sum_max todo (adi) delete this comment
     # todo why we calculating h in the rote node.
 
-    init_state.h = corner_edge_sum_max(init_state.cube)
+    init_state.h = heuristic(init_state.cube)
     cost_limit = init_state.h
     expended_nodes = 0
     frontier = list()
@@ -117,7 +146,7 @@ def ida(init_state):
                 new.g = curr.g + 1
                 new.parent = curr
                 new.move = perform_move(new.cube, i + 1, 0)[1]
-                new.h = corner_edge_sum_max(new.cube)
+                new.h = heuristic(new.cube)
 
                 if new.g + new.h > cost_limit:
                     if minimum is None or new.g + new.h < minimum:
@@ -179,6 +208,7 @@ def corner_edge_sum_max(cube):
 
 
 def corner_edge_sum_divide_by_4(cube):
+    # todo - ERROR!
     max_corners = 0
     max_edges = 0
     for i in range(18):
@@ -192,6 +222,7 @@ def corner_edge_sum_divide_by_4(cube):
 
 
 def kurf_h(cube):
+    # TODO - run forever :(
     corners = 0
     edges_1 = 0
     edges_2 = 0
@@ -209,6 +240,7 @@ def kurf_h(cube):
     return max(corners, edges_1, edges_2)
 
 def sum_divided_by_eight(cube):
+    # todo - this heuristic works, great!
     corners = 0
     edges = 0
     for i in range(18):
@@ -243,3 +275,6 @@ cube_array = np.array([
     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
 ])
+
+
+run_without_gui()

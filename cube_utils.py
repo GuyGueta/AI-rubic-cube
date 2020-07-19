@@ -3,9 +3,10 @@ from random import randint
 
 
 cube_by_color = []
+cube_size = 3
 for color in ['W', 'B', 'R', 'G', 'O', 'Y']:
-    sub_list = [color] * 3
-    for j in range(3):
+    sub_list = [color] * cube_size
+    for j in range(cube_size):
         cube_by_color.append(sub_list)
 basic_cube = np.array(cube_by_color)
 
@@ -35,6 +36,18 @@ def PrintCube(x):
 
     for k in range(15, 18):
         print(" "*13, str(x[k, 0:3]), " "*5)
+
+# def PrintCube_per_size(x):
+#     cube_size = 4
+#     for i in range(cube_size):
+#         print(" "*17, str(x[i, 0:cube_size]))
+#
+#     for m in range(cube_size, cube_size+cube_size):
+#         print(str(x[m, 0:cube_size]), str(x[m + cube_size, 0:cube_size]),
+#               str(x[m + 2*cube_size, 0:cube_size]), str(x[m + 3*cube_size, 0:cube_size]))
+#
+#     for k in range(20, 24):
+#         print(" "*17, str(x[k, 0:cube_size]), " "*5)
 
 
 move_per_num = {1: (('F', 1, 0), "front_clockwise"), 2: (('F', -1, 0), "front_anti_clockwise"),
@@ -75,7 +88,7 @@ def create_cube(total_move, init_cube):
     :return:
     """
     PrintCube(init_cube)
-
+    # PrintCube_per_size(init_cube)
     randoms_num_for_moves = [randint(1, 12) for x in range(total_move)]
     print(randoms_num_for_moves)
     for num in randoms_num_for_moves:
