@@ -3,7 +3,7 @@ from random import randint
 
 
 cube_by_color = []
-cube_size = 3
+cube_size = 4
 for color in ['W', 'B', 'R', 'G', 'O', 'Y']:
     sub_list = [color] * cube_size
     for j in range(cube_size):
@@ -37,17 +37,16 @@ def PrintCube(x):
     for k in range(15, 18):
         print(" "*13, str(x[k, 0:3]), " "*5)
 
-# def PrintCube_per_size(x):
-#     cube_size = 4
-#     for i in range(cube_size):
-#         print(" "*17, str(x[i, 0:cube_size]))
-#
-#     for m in range(cube_size, cube_size+cube_size):
-#         print(str(x[m, 0:cube_size]), str(x[m + cube_size, 0:cube_size]),
-#               str(x[m + 2*cube_size, 0:cube_size]), str(x[m + 3*cube_size, 0:cube_size]))
-#
-#     for k in range(20, 24):
-#         print(" "*17, str(x[k, 0:cube_size]), " "*5)
+def print_cube_per_size(x):
+    for i in range(cube_size):
+        print(" "*(cube_size*4+1), str(x[i, 0:cube_size]))
+
+    for m in range(cube_size, cube_size+cube_size):
+        print(str(x[m, 0:cube_size]), str(x[m + cube_size, 0:cube_size]),
+              str(x[m + 2*cube_size, 0:cube_size]), str(x[m + 3*cube_size, 0:cube_size]))
+
+    for k in range(cube_size*5, cube_size*6):
+        print(" "*(cube_size*4+1), str(x[k, 0:cube_size]), " "*5)
 
 
 move_per_num = {1: (('F', 1, 0), "front_clockwise"), 2: (('F', -1, 0), "front_anti_clockwise"),
@@ -68,7 +67,7 @@ def perform_move(x, move, print_cube=False):
     # perform the relevant action:
     action_per_move_num[move](x)
     if print_cube == 1:
-        PrintCube(x)
+        print_cube_per_size(x)
 
     return move_per_num[move]
 
@@ -87,7 +86,7 @@ def create_cube(total_move, init_cube):
     :param init_cube: the initial cube
     :return:
     """
-    PrintCube(init_cube)
+    print_cube_per_size(init_cube)
     # PrintCube_per_size(init_cube)
     randoms_num_for_moves = [randint(1, 12) for x in range(total_move)]
     print(randoms_num_for_moves)
@@ -102,22 +101,23 @@ def create_cube(total_move, init_cube):
 
     except IOError:
         pass
-    PrintCube(init_cube)
+    print_cube_per_size(init_cube)
     return move_list
-
 
 # moves:
 
 def front_clockwise(x):
-    x[6:9, 0:3] = np.fliplr(x[6:9, 0:3].transpose())
-    temp1 = np.array(x[2, 0:3])
-    temp2 = np.array(x[9:12, 0])
-    temp3 = np.array(x[15, 0:3])
-    temp4 = np.array(x[3:6, 2])
-    x[2, 0:3] = np.fliplr([temp4])[0]
-    x[9:12, 0] = temp1
-    x[15, 0:3] = np.fliplr([temp2])[0]
-    x[3:6, 2] = temp3
+    x[2*cube_size:3*cube_size, 0:cube_size] = np.fliplr(x[2*cube_size:3*cube_size, 0:cube_size].transpose())
+    temp1 = np.array(x[cube_size-1, 0:cube_size])
+    temp2 = np.array(x[cube_size*3:cube_size*4, 0])
+    temp3 = np.array(x[cube_size*5, 0:cube_size])
+    temp4 = np.array(x[cube_size:2*cube_size, cube_size-1])
+    x[cube_size-1, 0:cube_size] = np.fliplr([temp4])[0]
+    x[cube_size*3:cube_size*4, 0] = temp1
+    x[cube_size*5, 0:cube_size] = np.fliplr([temp2])[0]
+    x[cube_size:2*cube_size, cube_size-1] = temp3
+    print()
+    print_cube_per_size(x)
 
 
 def front_anti_clockwise(x):
@@ -126,15 +126,15 @@ def front_anti_clockwise(x):
 
 
 def up_cw(x):
-    x[0:3, 0:3] = np.fliplr(x[0:3, 0:3].transpose())
-    temp1 = np.array(x[12, 0:3])
-    temp2 = np.array(x[9, 0:3])
-    temp3 = np.array(x[6, 0:3])
-    temp4 = np.array(x[3, 0:3])
-    x[12, 0:3] = temp4
-    x[9, 0:3] = temp1
-    x[6, 0:3] = temp2
-    x[3, 0:3] = temp3
+    x[0:cube_size, 0:cube_size] = np.fliplr(x[0:cube_size, 0:cube_size].transpose())
+    temp1 = np.array(x[4*cube_size, 0:cube_size])
+    temp2 = np.array(x[3*cube_size, 0:cube_size])
+    temp3 = np.array(x[2*cube_size, 0:cube_size])
+    temp4 = np.array(x[cube_size, 0:cube_size])
+    x[4*cube_size, 0:cube_size] = temp4
+    x[3*cube_size, 0:cube_size] = temp1
+    x[2*cube_size, 0:cube_size] = temp2
+    x[cube_size, 0:cube_size] = temp3
 
 
 def up_anc(x):
@@ -143,15 +143,15 @@ def up_anc(x):
 
 
 def down_cw(x):
-    x[15:18, 0:3] = np.fliplr(x[15:18, 0:3].transpose())
-    temp1 = np.array(x[8, 0:3])
-    temp2 = np.array(x[11, 0:3])
-    temp3 = np.array(x[14, 0:3])
-    temp4 = np.array(x[5,0:3])
-    x[8, 0:3] = temp4
-    x[11, 0:3] = temp1
-    x[14, 0:3] = temp2
-    x[5, 0:3] = temp3
+    x[cube_size*5:cube_size*6, 0:cube_size] = np.fliplr(x[cube_size*5:cube_size*6, 0:cube_size].transpose())
+    temp1 = np.array(x[cube_size*3-1, 0:cube_size])
+    temp2 = np.array(x[cube_size*4-1, 0:cube_size])
+    temp3 = np.array(x[cube_size*5-1, 0:cube_size])
+    temp4 = np.array(x[cube_size*2-1, 0:cube_size])
+    x[cube_size*3-1, 0:cube_size] = temp4
+    x[cube_size*4-1, 0:cube_size] = temp1
+    x[cube_size*5-1, 0:cube_size] = temp2
+    x[cube_size*2-1, 0:cube_size] = temp3
 
 
 def down_acw(x):
@@ -160,15 +160,15 @@ def down_acw(x):
 
 
 def left_cw(x):
-    x[3:6, 0:3] = np.fliplr(x[3:6, 0:3].transpose())
-    temp1 = np.array(x[0:3, 0])
-    temp2 = np.array(x[6:9, 0])
-    temp3 = np.array(x[15:18, 0])
-    temp4 = np.array(x[12:15, 2])
-    x[0:3, 0] = np.fliplr([temp4])[0]
-    x[6:9, 0] = temp1
-    x[15:18, 0] = temp2
-    x[12:15, 2] = np.fliplr([temp3])[0]
+    x[cube_size:cube_size*2, 0:cube_size] = np.fliplr(x[cube_size:cube_size*2, 0:cube_size].transpose())
+    temp1 = np.array(x[0:cube_size, 0])
+    temp2 = np.array(x[cube_size*2:cube_size*3, 0])
+    temp3 = np.array(x[cube_size*5:cube_size*6, 0])
+    temp4 = np.array(x[cube_size*4:cube_size*5, cube_size-1])
+    x[0:cube_size, 0] = np.fliplr([temp4])[0]
+    x[cube_size*2:cube_size*3, 0] = temp1
+    x[cube_size*5:cube_size*6, 0] = temp2
+    x[cube_size*4:cube_size*5, cube_size-1] = np.fliplr([temp3])[0]
 
 
 def left_acw(x):
@@ -177,15 +177,15 @@ def left_acw(x):
 
 
 def right_cw(x):
-    x[9:12, 0:3] = np.fliplr(x[9:12, 0:3].transpose())
-    temp1 = np.array(x[0:3, 2])
-    temp2 = np.array(x[12:15, 0])
-    temp3 = np.array(x[15:18, 2])
-    temp4 = np.array(x[6:9, 2])
-    x[0:3, 2] = temp4
-    x[12:15, 0] = np.fliplr([temp1])[0]
-    x[15:18, 2] = np.fliplr([temp2])[0]
-    x[6:9, 2] = temp3
+    x[cube_size*3:cube_size*4, 0:cube_size] = np.fliplr(x[cube_size*3:cube_size*4, 0:cube_size].transpose())
+    temp1 = np.array(x[0:cube_size, cube_size-1])
+    temp2 = np.array(x[cube_size*4:cube_size*5, 0])
+    temp3 = np.array(x[cube_size*5:cube_size*6, cube_size-1])
+    temp4 = np.array(x[cube_size*2:cube_size*3, cube_size-1])
+    x[0:cube_size, cube_size-1] = temp4
+    x[cube_size*4:cube_size*5, 0] = np.fliplr([temp1])[0]
+    x[cube_size*5:cube_size*6, cube_size-1] = np.fliplr([temp2])[0]
+    x[cube_size*2:cube_size*3, cube_size-1] = temp3
 
 
 def right_acw(x):
@@ -194,20 +194,21 @@ def right_acw(x):
 
 
 def back_cw(x):
-    x[12:15, :] = np.fliplr(x[12:15, :].transpose())
-    temp1 = np.array(x[0, 0:3])
-    temp2 = np.array(x[3:6, 0])
-    temp3 = np.array(x[17, 0:3])
-    temp4 = np.array(x[9:12, 2])
-    x[0, 0:3] = temp4
-    x[3:6, 0] = np.fliplr([temp1])[0]
-    x[17, 0:3] = temp2
-    x[9:12, 2] = np.fliplr([temp3])[0]
+    x[cube_size*4:cube_size*5, :] = np.fliplr(x[cube_size*4:cube_size*5, :].transpose())
+    temp1 = np.array(x[0, 0:cube_size])
+    temp2 = np.array(x[cube_size:2*cube_size, 0])
+    temp3 = np.array(x[cube_size*6-1, 0:cube_size])
+    temp4 = np.array(x[cube_size*3:cube_size*4, cube_size-1])
+    x[0, 0:cube_size] = temp4
+    x[cube_size:2*cube_size, 0] = np.fliplr([temp1])[0]
+    x[cube_size*6-1, 0:cube_size] = temp2
+    x[cube_size*3:cube_size*4, cube_size-1] = np.fliplr([temp3])[0]
 
 
 def back_acw(x):
     for _ in range(3):
         back_cw(x)
+
 
 
 action_per_move_num = {1: front_clockwise, 2: front_anti_clockwise, 3: up_cw, 4: up_anc, 5: down_cw,
