@@ -32,7 +32,7 @@ def run_without_gui(from_file=None):
     path2solution = ida_solve_cube(curr)
 
 
-def init_cube(number_of_scrambles=10):
+def init_cube(number_of_scrambles=7):
     N = 3
     curr = State()
     curr.cube = np.array(basic_cube)
@@ -263,7 +263,7 @@ def color_heuristic(cube):
     """
     count = 0
     for i in range(6):
-        color = cube[i*3][1]
+        color = cube[i*3+1][1]
         for j in range(3):
             for k in range(3):
                 if cube[i*3+j][k] != color:
