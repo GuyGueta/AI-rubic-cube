@@ -1,4 +1,4 @@
-from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube, PrintCube
+from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube, PrintCube, print_cube_per_size
 import numpy as np
 from datetime import datetime
 import time
@@ -22,18 +22,17 @@ def read_cube_from_file(cur_cube, cube_file='input1.txt'):
 
 def run_without_gui(from_file=None):
     if from_file:
-        N = 3
         curr = State()
         curr.cube = np.array(basic_cube)
         read_cube_from_file(curr, cube_file='input1.txt')
-        PrintCube(curr.cube)
+        print_cube_per_size(curr.cube)
     else:
         curr, move_list = init_cube()
 
     path2solution = ida_solve_cube(curr)
 
 
-def init_cube(number_of_scrambles=5):
+def init_cube(number_of_scrambles=10):
     N = 3
     curr = State()
     curr.cube = np.array(basic_cube)
@@ -47,13 +46,14 @@ def ida_solve_cube(curr):
     fmt = '%H:%M:%S'
     start = time.strftime(fmt)
 
-    path_to_solution = ida(curr, sum_divided_by_eight)
+    path_to_solution = ida(curr, color_heuristic)
     path_for_gui = translate_path_for_gui(path_to_solution)
     print("path to solution", path_to_solution)
 
     time.ctime()
     end = time.strftime(fmt)
     print("Calculation time(sec):", datetime.strptime(end, fmt) - datetime.strptime(start, fmt))
+
     return path_for_gui[::-1]
 
 
@@ -79,6 +79,8 @@ def goal_reached(curr):
     try:
         file = open('output.txt', 'w')
         save_cube(file, curr.cube)
+        print("solution: \n")
+        print_cube_per_size(curr.cube)
         return True
 
     except IOError:
@@ -223,6 +225,7 @@ def corner_edge_sum_divide_by_4(cube):
 
 def kurf_h(cube):
     # TODO - run forever :(
+
     corners = 0
     edges_1 = 0
     edges_2 = 0
@@ -239,6 +242,7 @@ def kurf_h(cube):
             edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
     return max(corners, edges_1, edges_2)
 
+
 def sum_divided_by_eight(cube):
     # todo - this heuristic works, great!
     corners = 0
@@ -252,10 +256,44 @@ def sum_divided_by_eight(cube):
     return (corners + edges) / 8
 
 
-
+def color_heuristic(cube):
+    """
+    count the number of colors that different with goal.
+    sometimes return non optimal solution
+    """
+    count = 0
+    for i in range(6):
+        color = cube[i*3][1]
+        for j in range(3):
+            for k in range(3):
+                if cube[i*3+j][k] != color:
+                    count += 1
+    return count // 3
 
 # todo: change this array to make it look better
 cube_array = np.array([
+    [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
+    [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
+    [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
+    [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
+    [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
+    [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
+])
+
+
+cube_array_4 = np.array([
     [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
     [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
     [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
