@@ -1,4 +1,5 @@
-from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube, PrintCube, print_cube_per_size
+from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
+    PrintCube, print_cube_per_size, cube_size
 import numpy as np
 from datetime import datetime
 import time
@@ -32,7 +33,7 @@ def run_without_gui(from_file=None):
     path2solution = ida_solve_cube(curr)
 
 
-def init_cube(number_of_scrambles=7):
+def init_cube(number_of_scrambles=5):
     N = 3
     curr = State()
     curr.cube = np.array(basic_cube)
@@ -263,12 +264,12 @@ def color_heuristic(cube):
     """
     count = 0
     for i in range(6):
-        color = cube[i*3+1][1]
-        for j in range(3):
-            for k in range(3):
-                if cube[i*3+j][k] != color:
+        color = cube[i*cube_size+1][1]
+        for j in range(cube_size):
+            for k in range(cube_size):
+                if cube[i*cube_size+j][k] != color:
                     count += 1
-    return count // 3
+    return count // cube_size
 
 # todo: change this array to make it look better
 cube_array = np.array([
