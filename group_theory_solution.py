@@ -1,4 +1,5 @@
 from rubik_solver import utils
+from rubik_solver.Cubie import Cubie
 
 from cube_interactive import *
 
@@ -76,3 +77,7 @@ def actions_from_group_theory_to_q_learn(group_theory_actions):
 
 def solve_with_group_theory(cube):
     return actions_from_group_theory_to_q_learn(utils.solve(from_cube_to_str(cube), 'Kociemba'))
+
+
+print(from_str_to_cubie('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby'))
+print(utils.solve('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby', 'Kociemba'))
