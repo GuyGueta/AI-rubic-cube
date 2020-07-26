@@ -1,8 +1,36 @@
-from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube
+from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
+    PrintCube, print_cube_per_size, cube_size
 import numpy as np
 from datetime import datetime
 import time
 import matplotlib.pyplot as plt
+
+
+def read_cube_from_file(cur_cube, cube_file='input1.txt'):
+    cube_to_create = open(cube_file)
+    indexes = [0, 1, 2, 3, 6, 9, 12, 4, 7, 10, 13, 5, 8, 11, 14, 15, 16, 17]
+    index = 0
+    for line in cube_to_create:
+        line = line.replace(' ', '')
+        for row in line.split('['):
+            if len(row) != 0:
+                i = indexes[index]
+                cur_cube.cube[i, 0] = row[1]
+                cur_cube.cube[i, 1] = row[4]
+                cur_cube.cube[i, 2] = row[7]
+                index = index + 1
+
+
+def run_without_gui(from_file=None):
+    if from_file:
+        curr = State()
+        curr.cube = np.array(basic_cube)
+        read_cube_from_file(curr, cube_file='input1.txt')
+        print_cube_per_size(curr.cube)
+    else:
+        curr, move_list = init_cube()
+
+    path2solution = ida_solve_cube(curr)
 
 
 def init_cube(number_of_scrambles=5):
@@ -19,13 +47,14 @@ def ida_solve_cube(curr):
     fmt = '%H:%M:%S'
     start = time.strftime(fmt)
 
-    path_to_solution = ida(curr)
+    path_to_solution = ida(curr, color_heuristic)
     path_for_gui = translate_path_for_gui(path_to_solution)
     print("path to solution", path_to_solution)
 
     time.ctime()
     end = time.strftime(fmt)
     print("Calculation time(sec):", datetime.strptime(end, fmt) - datetime.strptime(start, fmt))
+
     return path_for_gui[::-1]
 
 
@@ -51,6 +80,8 @@ def goal_reached(curr):
     try:
         file = open('output.txt', 'w')
         save_cube(file, curr.cube)
+        print("solution: \n")
+        print_cube_per_size(curr.cube)
         return True
 
     except IOError:
@@ -81,10 +112,11 @@ def check_repeat_frontier(state, frontier):
     return False
 
 
-def ida(init_state):
+def ida(init_state, heuristic):
+    # corner_edge_sum_max todo (adi) delete this comment
     # todo why we calculating h in the rote node.
 
-    init_state.h = corner_edge_sum_max(init_state.cube)
+    init_state.h = heuristic(init_state.cube)
     cost_limit = init_state.h
     expended_nodes = 0
     frontier = list()
@@ -117,7 +149,7 @@ def ida(init_state):
                 new.g = curr.g + 1
                 new.parent = curr
                 new.move = perform_move(new.cube, i + 1, 0)[1]
-                new.h = corner_edge_sum_max(new.cube)
+                new.h = heuristic(new.cube)
 
                 if new.g + new.h > cost_limit:
                     if minimum is None or new.g + new.h < minimum:
@@ -178,6 +210,66 @@ def corner_edge_sum_max(cube):
     return max(corners / 12, edges / 8)
 
 
+def corner_edge_sum_divide_by_4(cube):
+    # todo - ERROR!
+    max_corners = 0
+    max_edges = 0
+    for i in range(18):
+        temp_corers = 0
+        temp_edges = 0
+        if i % 3 == 0 or i % 3 == 2:
+            max_corners = max_corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            max_edges = max_edges + manhattan_distance(cube, i, 1, False)
+        else:
+            max_edges = max_edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+
+
+def kurf_h(cube):
+    # TODO - run forever :(
+
+    corners = 0
+    edges_1 = 0
+    edges_2 = 0
+    for i in range(18):
+        if i % 3 == 0 or i % 3 == 2:
+            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            if i % 3 == 0:
+                edges_1 = edges_1 + manhattan_distance(cube, i, 1, False)
+            else:
+                edges_2 = edges_2 + manhattan_distance(cube, i, 1, False)
+
+        else:
+            edges_1 = edges_1 + manhattan_distance(cube, i, 0, False)
+            edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
+    return max(corners, edges_1, edges_2)
+
+
+def sum_divided_by_eight(cube):
+    # todo - this heuristic works, great!
+    corners = 0
+    edges = 0
+    for i in range(18):
+        if i % 3 == 0 or i % 3 == 2:
+            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+            edges = edges + manhattan_distance(cube, i, 1, False)
+        else:
+            edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+    return (corners + edges) / 8
+
+
+def color_heuristic(cube):
+    """
+    count the number of colors that different with goal.
+    sometimes return non optimal solution
+    """
+    count = 0
+    for i in range(6):
+        color = cube[i*cube_size+1][1]
+        for j in range(cube_size):
+            for k in range(cube_size):
+                if cube[i*cube_size+j][k] != color:
+                    count += 1
+    return count // cube_size
 
 # todo: change this array to make it look better
 cube_array = np.array([
@@ -200,3 +292,28 @@ cube_array = np.array([
     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
 ])
+
+
+cube_array_4 = np.array([
+    [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
+    [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+    [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
+    [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
+    [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
+    [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
+    [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+    [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
+    [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
+])
+
+
+run_without_gui()
