@@ -50,7 +50,7 @@ if __name__ == "__main__":
     N_SAMPLES = 100
     N_EPOCH = 10000
 
-    file_path = "auto.h5"
+    file_path = "weights.h5"
 
     checkpoint = ModelCheckpoint(file_path, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 

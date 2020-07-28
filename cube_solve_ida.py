@@ -31,8 +31,8 @@ def run_without_gui(from_file=None):
     else:
         curr, move_list, moves_by_numbers = init_cube(number_of_scrambles=7)
 
-    # sol_ida = ida_solve_cube(curr)
-    sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+    sol_ida = ida_solve_cube(curr)
+    # sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
 
 
 def init_cube(number_of_scrambles=7):
