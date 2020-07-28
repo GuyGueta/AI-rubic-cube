@@ -1,5 +1,6 @@
 from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
     PrintCube, print_cube_per_size, cube_size
+from reinforcement_learning_solver import *
 import numpy as np
 from datetime import datetime
 import time
@@ -28,18 +29,19 @@ def run_without_gui(from_file=None):
         read_cube_from_file(curr, cube_file='input1.txt')
         print_cube_per_size(curr.cube)
     else:
-        curr, move_list = init_cube()
+        curr, move_list, moves_by_numbers = init_cube(number_of_scrambles=7)
 
-    path2solution = ida_solve_cube(curr)
+    # sol_ida = ida_solve_cube(curr)
+    sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
 
 
-def init_cube(number_of_scrambles=5):
+def init_cube(number_of_scrambles=7):
     N = 3
     curr = State()
     curr.cube = np.array(basic_cube)
-    move_list = create_cube(number_of_scrambles, curr.cube)
+    move_list, moves_by_numbers = create_cube(number_of_scrambles, curr.cube)
     plt.show()
-    return curr, move_list
+    return curr, move_list, moves_by_numbers
 
 
 def ida_solve_cube(curr):
@@ -47,7 +49,7 @@ def ida_solve_cube(curr):
     fmt = '%H:%M:%S'
     start = time.strftime(fmt)
 
-    path_to_solution = ida(curr, color_heuristic)
+    path_to_solution = ida(curr, kurf_h)
     path_for_gui = translate_path_for_gui(path_to_solution)
     print("path to solution", path_to_solution)
 
@@ -210,18 +212,18 @@ def corner_edge_sum_max(cube):
     return max(corners / 12, edges / 8)
 
 
-def corner_edge_sum_divide_by_4(cube):
-    # todo - ERROR!
-    max_corners = 0
-    max_edges = 0
-    for i in range(18):
-        temp_corers = 0
-        temp_edges = 0
-        if i % 3 == 0 or i % 3 == 2:
-            max_corners = max_corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
-            max_edges = max_edges + manhattan_distance(cube, i, 1, False)
-        else:
-            max_edges = max_edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+# def corner_edge_sum_divide_by_4(cube):
+#     # todo - ERROR!
+#     max_corners = 0
+#     max_edges = 0
+#     for i in range(18):
+#         temp_corers = 0
+#         temp_edges = 0
+#         if i % 3 == 0 or i % 3 == 2:
+#             max_corners = max_corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+#             max_edges = max_edges + manhattan_distance(cube, i, 1, False)
+#         else:
+#             max_edges = max_edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
 
 
 def kurf_h(cube):
@@ -241,7 +243,7 @@ def kurf_h(cube):
         else:
             edges_1 = edges_1 + manhattan_distance(cube, i, 0, False)
             edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
-    return max(corners, edges_1, edges_2)
+    return max(corners/8, edges_1/4, edges_2/4)
 
 
 def sum_divided_by_eight(cube):
@@ -269,51 +271,62 @@ def color_heuristic(cube):
             for k in range(cube_size):
                 if cube[i*cube_size+j][k] != color:
                     count += 1
-    return count // cube_size
+    return count / cube_size
 
 # todo: change this array to make it look better
 cube_array = np.array([
     [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
     [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
     [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+
     [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
     [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
     [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
+
     [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
     [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+
     [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
     [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
     [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
+
     [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
     [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
     [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
+
     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
+
 ])
 
 
-cube_array_4 = np.array([
-    [[0, 0, 2], [1, 0, 2], [2, 0, 2]],  # 2 corners + 1 edge
-    [[0, 0, 1], [1, 0, 1], [2, 0, 1]],  # center + 2 edge
-    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
-    [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
-    [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
-    [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
-    [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
-    [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
-    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
-    [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
-    [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
-    [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
-    [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
-    [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
-    [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
-    [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
-    [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
-    [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
-])
+# cube_array_4 = np.array([
+#     [0, 0, 3], [1, 0, 3], [2, 0, 3], [3, 0, 3],
+#      [0, 0, 2], [1, 0, 2], [2, 0, 2], [3, 0, 2],
+#      [[0, 0, 1], [1, 0, 1], [2, 0, 1], [3, 0, 1],
+#     [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]],
+#
+#     [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
+#     [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
+#     [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
+#
+#     [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
+#     [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
+#     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+#
+#     [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
+#     [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
+#     [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
+#
+#     [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
+#     [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
+#     [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
+#     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
+#     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
+#     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
+# ])
 
 
 run_without_gui()

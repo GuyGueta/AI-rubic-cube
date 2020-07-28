@@ -1,9 +1,11 @@
 import numpy as np
 from random import randint
-
+import pycuber as pc
+from collections import Counter
+from random import choice
 
 cube_by_color = []
-cube_size = 4
+cube_size = 3
 for color in ['W', 'B', 'R', 'G', 'O', 'Y']:
     sub_list = [color] * cube_size
     for j in range(cube_size):
@@ -37,6 +39,7 @@ def PrintCube(x):
     for k in range(15, 18):
         print(" "*13, str(x[k, 0:3]), " "*5)
 
+
 def print_cube_per_size(x):
     for i in range(cube_size):
         print(" "*(cube_size*4+1), str(x[i, 0:cube_size]))
@@ -55,6 +58,18 @@ move_per_num = {1: (('F', 1, 0), "front_clockwise"), 2: (('F', -1, 0), "front_an
                 7: (('L', 1, 0), "left_clockwise"), 8: (('L', -1, 0), "left_anti_clockwise"),
                 9: (('R', 1, 0), "right_clockwise"), 10: (('R', -1, 0), "right_anti_clockwise"),
                 11: (('B', 1, 0), "back_clockwise"), 12: (('B', -1, 0), "back_anti_clockwise")}
+
+
+new_action__per_number = {1: 'F', 2: "F'", 3: 'U', 4:"U'", 5: 'D', 6: "D'",
+                          7: 'L', 8: "L'", 9: 'R', 10: "R'", 11: 'B', 12: "B'"}  # to use the same cube as A*
+
+action_map = {'F': 0, 'B': 1, 'U': 2, 'D': 3, 'L': 4, 'R': 5, "F'": 6, "B'": 7, "U'": 8, "D'": 9, "L'": 10, "R'": 11,
+              'F2': 12, 'B2': 13, 'U2': 14, 'D2': 15, 'L2': 16, 'R2': 17, "F2'": 18, "B2'": 19, "U2'": 20, "D2'": 21,
+              "L2'": 22, "R2'": 23}
+
+action_map_small = {'F': 0, 'B': 1, 'U': 2, 'D': 3, 'L': 4, 'R': 5, "F'": 6, "B'": 7, "U'": 8, "D'": 9, "L'": 10, "R'": 11}
+color_list_map = {'green': [1, 0, 0, 0, 0, 0], 'blue': [0, 1, 0, 0, 0, 0], 'yellow': [0, 0, 1, 0, 0, 0],
+                  'red': [0, 0, 0, 1, 0, 0], 'orange': [0, 0, 0, 0, 1, 0], 'white': [0, 0, 0, 0, 0, 1]}
 
 
 def perform_move(x, move, print_cube=False):
@@ -102,7 +117,7 @@ def create_cube(total_move, init_cube):
     except IOError:
         pass
     print_cube_per_size(init_cube)
-    return move_list
+    return move_list, randoms_num_for_moves
 
 # moves:
 
@@ -116,8 +131,6 @@ def front_clockwise(x):
     x[cube_size*3:cube_size*4, 0] = temp1
     x[cube_size*5, 0:cube_size] = np.fliplr([temp2])[0]
     x[cube_size:2*cube_size, cube_size-1] = temp3
-    print()
-    print_cube_per_size(x)
 
 
 def front_anti_clockwise(x):
@@ -214,3 +227,142 @@ def back_acw(x):
 action_per_move_num = {1: front_clockwise, 2: front_anti_clockwise, 3: up_cw, 4: up_anc, 5: down_cw,
                        6: down_acw, 7: left_cw, 8: left_acw, 9: right_cw, 10: right_acw, 11: back_cw,
                        12: back_acw}
+
+
+# helper function for the reinforcement learning:
+
+
+def flatten(cube):
+    sides = [cube.F, cube.B, cube.U, cube.D, cube.L, cube.R]
+    flat = []
+    for x in sides:
+        for i in range(3):
+            for j in range(3):
+                flat.append(x[i][j].colour)
+    return flat
+
+
+def flatten_1d_b(cube):
+    sides = [cube.F, cube.B, cube.U, cube.D, cube.L, cube.R]
+    flat = []
+    for x in sides:
+        for i in range(3):
+            for j in range(3):
+                flat.extend(color_list_map[x[i][j].colour])
+    return flat
+
+
+def order(data):
+    if len(data) <= 1:
+        return 0
+
+    counts = Counter()
+
+    for d in data:
+        counts[d] += 1
+
+    probs = [float(c) / len(data) for c in counts.values()]
+
+    return max(probs)
+
+
+def perc_solved_cube(cube):
+    flat = flatten(cube)
+    perc_side = [order(flat[i:(i + 9)]) for i in range(0, 9 * 6, 9)]
+    return np.mean(perc_side)
+
+
+def gen_sample(n_steps=6):
+    cube = pc.Cube()
+
+    transformation = [choice(list(action_map.keys())) for _ in range(n_steps)]
+    print(transformation)
+
+
+    # todo - ^^^ this is the scramble actions. need to create a dict
+    my_formula = pc.Formula(transformation)
+
+    cube(my_formula)
+
+    my_formula.reverse()
+
+    sample_X = []
+    sample_Y = []
+    cubes = []
+
+    for s in my_formula:
+        sample_X.append(flatten_1d_b(cube))
+        sample_Y.append(action_map[s.name])
+        cubes.append(cube.copy())
+        cube(s.name)
+
+    return sample_X, sample_Y, cubes
+
+# todo - i add this lines to create a cube:
+
+
+def gen_sample_2(move_list, n_steps=6):
+    cube = pc.Cube()
+    transformation = []
+    for act in move_list:
+        transformation.append(new_action__per_number[act])
+    # transformation = [choice(list(action_map.keys())) for _ in range(n_steps)]
+    print(transformation)
+
+    # todo - ^^^ this is the scramble actions. need to create a dict
+    my_formula = pc.Formula(transformation)
+
+    cube(my_formula)
+
+    my_formula.reverse()
+
+    sample_X = []
+    sample_Y = []
+    cubes = []
+
+    for s in my_formula:
+        sample_X.append(flatten_1d_b(cube))
+        sample_Y.append(action_map[s.name])
+        cubes.append(cube.copy())
+        cube(s.name)
+
+    return sample_X, sample_Y, cubes
+
+
+def gen_sequence(n_steps=6):
+    cube = pc.Cube()
+
+    transformation = [choice(list(action_map_small.keys())) for _ in range(n_steps)]
+
+    my_formula = pc.Formula(transformation)
+
+    cube(my_formula)
+
+    my_formula.reverse()
+
+    cubes = []
+    distance_to_solved = []
+
+    for i, s in enumerate(my_formula):
+        cubes.append(cube.copy())
+        cube(s.name)
+        distance_to_solved.append(n_steps-i)
+
+    return cubes, distance_to_solved
+
+
+def get_all_possible_actions_cube_small(cube):
+
+    flat_cubes = []
+    rewards = []
+
+    for a in action_map_small:
+        cube_copy = cube.copy()
+        cube_copy = cube_copy(a)
+        flat_cubes.append(flatten_1d_b(cube_copy))
+        rewards.append(2*int(perc_solved_cube(cube_copy)>0.99)-1)
+
+    return flat_cubes, rewards
+
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
