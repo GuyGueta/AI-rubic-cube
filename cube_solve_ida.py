@@ -1,11 +1,14 @@
 from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
     PrintCube, print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
-import numpy as np
+
 from datetime import datetime
 import time
-import matplotlib.pyplot as plt
 from plot_results import *
+
+CUBE_CENTERS_DICT_4 = counter_dict = {'W': 1, 'B': 5, 'R': 9, 'G': 13, 'O': 17, 'Y': 21}
+CUBE_BORDER_INDEX_4 = {3: 0, 7: 4, 11: 8, 15: 12, 19: 16, 23: 20}
+
 
 def read_cube_from_file(cur_cube, cube_file='input1.txt'):
     cube_to_create = open(cube_file)
@@ -122,11 +125,11 @@ def check_repeat_frontier(state, frontier):
     return False
 
 
-def ida(init_state, heuristic):
+def ida(init_state, heuristic, is3on3=True):
     # corner_edge_sum_max todo (adi) delete this comment
     # todo why we calculating h in the rote node.
 
-    init_state.h = heuristic(init_state.cube)
+    init_state.h = heuristic(init_state.cube, is3on3)
     cost_limit = init_state.h
     expended_nodes = 0
     frontier = list()
@@ -159,7 +162,7 @@ def ida(init_state, heuristic):
                 new.g = curr.g + 1
                 new.parent = curr
                 new.move = perform_move(new.cube, i + 1, 0)[1]
-                new.h = heuristic(new.cube)
+                new.h = heuristic(new.cube, is3on3)
 
                 if new.g + new.h > cost_limit:
                     if minimum is None or new.g + new.h < minimum:
@@ -180,16 +183,62 @@ def calculate_distance(c1, c2):
     return abs(c1[0] - c2[0]) + abs(c1[1] - c2[1]) + abs(c1[2] - c2[2])
 
 
-def manhattan_distance(cube, i, z, corner):
+def manhattan_distance(cube, i, z, corner, is_3on3=True):
+    if is_3on3:
+        return manhattan_distance_3(cube, i, z, corner)
+    else:
+        return manhattan_distance_4(cube, i, z, corner)
+
+
+def manhattan_distance_4(cube, i, z, corner):
+    c1 = cube_array_4[i, z]
+    center = calc_center_index(i, cube)
+    if corner:
+        c2_list = [cube_array_4[center - 1, 0], cube_array_4[center - 1, 3], cube_array_4[center + 2, 0],
+                   cube_array_4[center + 2, 3]]
+        d = []
+        for c2 in c2_list:
+            d.append(calculate_distance(c1, c2))
+
+        return min(d)
+    else:
+        c2_list = [cube_array_4[center - 1, 1], cube_array_4[center - 1, 2], cube_array_4[center + 1, 0],
+                   cube_array_4[center, 0], cube_array_4[center, 3], cube_array_4[center + 1, 3],
+                   cube_array_4[center + 2, 1], cube_array_4[center + 2, 2]]
+        d = []
+        for c2 in c2_list:
+            d.append(calculate_distance(c1, c2))
+        return min(d)
+
+
+def calc_center_index(index, cube):
+    border_start = 0
+    for num in CUBE_BORDER_INDEX_4.keys():
+        if index <= num:
+            border_start = CUBE_BORDER_INDEX_4[num]
+    max_color = find_max_color(border_start, cube)
+    return CUBE_CENTERS_DICT_4[max_color]
+
+
+def find_max_color(border_start, cube):
+    counter_dict = {'W': 0, 'B': 0, 'R': 0, 'G': 0, 'O': 0, 'Y': 0}
+    for i in range(border_start, border_start + 4):
+        for j in range(4):
+            counter_dict[cube[i, j]] += 1
+    return max(counter_dict, key=counter_dict.get)
+
+
+def manhattan_distance_3(cube, i, z, corner):
     c1 = cube_array[i, z]
     center = None
     for c in [1, 4, 7, 10, 13, 16]:
-        if cube[i, z] == cube[c, 1]: # checks the colors, to know in which side of the original cube to compere to
+        if cube[i, z] == cube[c, 1]:  # checks the colors, to know in which side of the original cube to compere to
             center = c
             break
 
     if corner:
-        c2_list = [cube_array[center - 1, 0], cube_array[center - 1, 2], cube_array[center + 1, 0], cube_array[center + 1, 2]]
+        c2_list = [cube_array[center - 1, 0], cube_array[center - 1, 2], cube_array[center + 1, 0],
+                   cube_array[center + 1, 2]]
         d = []
         for c2 in c2_list:
             d.append(calculate_distance(c1, c2))
@@ -208,16 +257,29 @@ def manhattan_distance(cube, i, z, corner):
 """ for every cubie in the cube, the algorithm checks is color, goes to the border of that color in the initial cube 
  and and calculate the Manhatten dist by the numbers ( its the cord from 0- 2 in the border) from the border in the 
  current cube """
-def corner_edge_sum_max(cube):
+def corner_edge_sum_max(cube, is_3on3=True):
     corners = 0
     edges = 0
-    for i in range(18):
-        if i % 3 == 0 or i % 3 == 2:
-            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
-            edges = edges + manhattan_distance(cube, i, 1, False)
-        else:
-            edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
-    return max(corners / 12, edges / 8)
+    if is_3on3:
+        for i in range(18):
+            if i % 3 == 0 or i % 3 == 2:
+                corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+                edges = edges + manhattan_distance(cube, i, 1, False)
+            else:
+                edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+        return max(corners / 12, edges / 8)
+    else:
+        for i in range(24):
+            if i % 4 == 0 or i % 4 == 3:
+                corners = corners + manhattan_distance(cube, i, 0, True, False) + \
+                          manhattan_distance(cube, i, 3, True, False)
+                edges = edges + min(manhattan_distance(cube, i, 1, False, False),manhattan_distance(cube, i, 2, False, False))
+            else:
+                edges = edges + min(manhattan_distance(cube, i, 0, False, False),
+                                    manhattan_distance(cube, i + 1, 0, False, False)) + \
+                        min(manhattan_distance(cube, i, 3, False, False),
+                            manhattan_distance(cube, i + 1, 3, False, False))
+        return max(corners / 12, edges / 8)
 
 
 # def corner_edge_sum_divide_by_4(cube):
@@ -234,40 +296,66 @@ def corner_edge_sum_max(cube):
 #             max_edges = max_edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
 
 
-def kurf_h(cube):
-    # TODO - run forever :(
-
+def kurf_h(cube, is_3on3=True):
     corners = 0
     edges_1 = 0
     edges_2 = 0
-    for i in range(18):
-        if i % 3 == 0 or i % 3 == 2:
-            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
-            if i % 3 == 0:
-                edges_1 = edges_1 + manhattan_distance(cube, i, 1, False)
+    if is_3on3:
+        for i in range(18):
+            if i % 3 == 0 or i % 3 == 2:
+                corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+                if i % 3 == 0:
+                    edges_1 = edges_1 + manhattan_distance(cube, i, 1, False)
+                else:
+                    edges_2 = edges_2 + manhattan_distance(cube, i, 1, False)
             else:
-                edges_2 = edges_2 + manhattan_distance(cube, i, 1, False)
+                edges_1 = edges_1 + manhattan_distance(cube, i, 0, False)
+                edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
+        return max(corners / 8, edges_1 / 8, edges_2 / 8)
+    else:
+        for i in range(24):
+            if i % 4 == 0 or i % 4 == 3:
+                corners = corners + manhattan_distance(cube, i, 0, True, False) + manhattan_distance(cube, i, 3, True,
+                                                                                                     False)
+                if i % 4 == 0:
+                    edges_1 = edges_1 + min(manhattan_distance(cube, i, 1, False, False),
+                                            manhattan_distance(cube, i, 2, False, False))
+                else:
+                    edges_2 = edges_2 + min(manhattan_distance(cube, i, 1, False, False),
+                                            manhattan_distance(cube, i, 2, False, False))
+            else:
+                edges_1 = edges_1 + min(manhattan_distance(cube, i, 0, False, False), manhattan_distance(cube, i + 1, 0, False, False))
+                edges_2 = edges_2 + min(manhattan_distance(cube, i, 3, False, False),
+                                        manhattan_distance(cube, i + 1, 3, False, False))
+        return max(corners / 8, edges_1 / 8, edges_2 / 8)
 
-        else:
-            edges_1 = edges_1 + manhattan_distance(cube, i, 0, False)
-            edges_2 = edges_2 + manhattan_distance(cube, i, 2, False)
-    return max(corners/8, edges_1/4, edges_2/4)
 
-
-def sum_divided_by_eight(cube):
-    # todo - this heuristic works, great!
+def sum_divided_by_eight(cube, is_3on3=True):
     corners = 0
     edges = 0
-    for i in range(18):
-        if i % 3 == 0 or i % 3 == 2:
-            corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
-            edges = edges + manhattan_distance(cube, i, 1, False)
-        else:
-            edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
-    return (corners + edges) / 8
+    if is_3on3:
+        for i in range(18):
+            if i % 3 == 0 or i % 3 == 2:
+                corners = corners + manhattan_distance(cube, i, 0, True) + manhattan_distance(cube, i, 2, True)
+                edges = edges + manhattan_distance(cube, i, 1, False)
+            else:
+                edges = edges + manhattan_distance(cube, i, 0, False) + manhattan_distance(cube, i, 2, False)
+        return (corners + edges) / 8
+    else:
+        for i in range(24):
+            if i % 4 == 0 or i % 4 == 3:
+                corners = corners + manhattan_distance(cube, i, 0, True, False) + \
+                          manhattan_distance(cube, i, 3, True, False)
+                edges = edges + min(manhattan_distance(cube, i, 1, False, False),manhattan_distance(cube, i, 2, False, False))
+            else:
+                edges = edges + min(manhattan_distance(cube, i, 0, False, False),
+                                    manhattan_distance(cube, i + 1, 0, False, False)) + \
+                        min(manhattan_distance(cube, i, 3, False, False),
+                            manhattan_distance(cube, i + 1, 3, False, False))
+        return (corners + edges) / 8
 
 
-def color_heuristic(cube):
+def color_heuristic(cube, is3on3=True):
     """
     count the number of colors that different with goal.
     sometimes return non optimal solution
@@ -286,8 +374,11 @@ def ida_solve_cube(curr, heuristic=sum_divided_by_eight):
     time.ctime()
     fmt = '%H:%M:%S'
     start = time.strftime(fmt)
+    if cube_size ==4:
+        path_to_solution, expended_nodes = ida(curr, heuristic, False)
+    else:
+        path_to_solution, expended_nodes = ida(curr, heuristic)
 
-    path_to_solution, expended_nodes = ida(curr, heuristic)
     path_for_gui = translate_path_for_gui(path_to_solution)
     print("path to solution", path_to_solution)
 
@@ -296,9 +387,6 @@ def ida_solve_cube(curr, heuristic=sum_divided_by_eight):
     print("Calculation time(sec):", datetime.strptime(end, fmt) - datetime.strptime(start, fmt))
 
     return path_for_gui[::-1], expended_nodes
-
-
-
 
 
 # todo: change this array to make it look better
@@ -357,4 +445,37 @@ cube_array = np.array([
 # ])
 
 
-run_without_gui(6)
+cube_array_4 = np.array([
+    # W 1
+    [[0, 0, 3], [1, 0, 3], [2, 0, 3], [3, 0, 3]],  # 2 corners + 2 edge
+    [[0, 0, 2], [1, 0, 2], [2, 0, 2], [3, 0, 2]],  # 2 center + 2 edge
+    [[0, 0, 1], [1, 0, 1], [2, 0, 1], [3, 0, 1]],  # 2 center + 2 edge
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]],  # 2 corners + 2 edge
+    # B 5
+    [[0, 0, 3], [0, 1, 3], [2, 2, 3], [3, 3, 3]],  # 2 corners + 2 edge
+    [[0, 0, 2], [0, 1, 2], [2, 2, 2], [3, 3, 2]],  # 2 center + 2 edge
+    [[0, 0, 1], [0, 1, 1], [2, 2, 1], [3, 3, 1]],  # center + 2 edge
+    [[0, 0, 0], [0, 1, 0], [2, 2, 0], [3, 3, 0]],  # 2 corners + 2 edge
+    # R 9
+    [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]],  # 2 corners + 2 edge
+    [[0, 1, 0], [1, 1, 0], [2, 1, 0], [3, 1, 0]],  # 2 center + 2 edge
+    [[0, 2, 0], [1, 2, 0], [2, 2, 0], [3, 2, 0]],  # 2 center + 2 edge
+    [[0, 3, 0], [1, 3, 0], [2, 3, 0], [3, 3, 0]],  # 2 corners + 2 edge
+    # G 13
+    [[3, 0, 0], [3, 0, 1], [3, 0, 2], [3, 0, 3]],  # 2 corners + 2 edge
+    [[3, 1, 0], [3, 1, 1], [3, 1, 2], [3, 1, 3]],  # 2 center + 2 edge
+    [[3, 2, 0], [3, 2, 1], [3, 2, 2], [3, 2, 3]],  # 2 center + 2 edge
+    [[3, 3, 0], [3, 3, 1], [3, 3, 2], [3, 3, 3]],  # 2 corners + 2 edge
+    # O 17
+    [[3, 0, 3], [2, 0, 3], [1, 0, 3], [0, 0, 3]],  # 2 corners + 2 edge
+    [[3, 1, 3], [2, 1, 3], [1, 1, 3], [0, 1, 3]],  # 2 center + 2 edge
+    [[3, 2, 3], [2, 2, 3], [1, 2, 3], [0, 2, 3]],  # 2 center + 2 edge
+    [[3, 3, 3], [2, 3, 3], [1, 3, 3], [0, 3, 3]],  # 2 corners + 2 edge
+    # Y 21
+    [[0, 3, 0], [1, 3, 0], [2, 3, 0], [3, 3, 0]],  # 2 corners + 2 edge
+    [[0, 3, 1], [1, 3, 1], [2, 3, 1], [3, 3, 1]],  # 2 center + 2 edge
+    [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2]],  # 2 center + 2 edge
+    [[0, 3, 3], [1, 3, 3], [2, 3, 3], [3, 3, 3]],  # 2 corners + 2 edge
+
+])
+run_without_gui(5)
