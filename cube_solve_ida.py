@@ -5,7 +5,7 @@ import numpy as np
 from datetime import datetime
 import time
 import matplotlib.pyplot as plt
-
+from plot_results import *
 
 def read_cube_from_file(cur_cube, cube_file='input1.txt'):
     cube_to_create = open(cube_file)
@@ -22,18 +22,42 @@ def read_cube_from_file(cur_cube, cube_file='input1.txt'):
                 index = index + 1
 
 
-def run_without_gui(from_file=None):
+def run_without_gui(number_of_scrambles=6, from_file=None):
     if from_file:
         curr = State()
         curr.cube = np.array(basic_cube)
         read_cube_from_file(curr, cube_file='input1.txt')
         print_cube_per_size(curr.cube)
     else:
-        curr, move_list, moves_by_numbers = init_cube(number_of_scrambles=7)
+        curr, move_list, moves_by_numbers = init_cube(number_of_scrambles)
 
-    sol_ida = ida_solve_cube(curr)
-    # sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+    expended_nodes_list = []
+    heuristic = []
 
+    print("corner edge sum max:")
+    sol_corner_edge_sum_max, expended_nodes = ida_solve_cube(curr, corner_edge_sum_max)
+    heuristic.append("corner edge sum max")
+    expended_nodes_list.append(expended_nodes)
+
+    print("sum divided by eight solution:")
+    sol_sum_divided_by_eight, expended_nodes = ida_solve_cube(curr, sum_divided_by_eight)
+    heuristic.append("sum divided by eight")
+    expended_nodes_list.append(expended_nodes)
+
+    print("korf solution:")
+    sol_kurf, expended_nodes = ida_solve_cube(curr, kurf_h)
+    heuristic.append("korf")
+    expended_nodes_list.append(expended_nodes)
+
+    print("colors solution:")
+    sol_colors, expended_nodes = ida_solve_cube(curr, color_heuristic)
+    heuristic.append("colors")
+    expended_nodes_list.append(expended_nodes)
+
+    print("reinforcement learning solution")
+    sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+
+    expanded_nodes(heuristic, expended_nodes_list)
 
 def init_cube(number_of_scrambles=7):
     N = 3
@@ -42,22 +66,6 @@ def init_cube(number_of_scrambles=7):
     move_list, moves_by_numbers = create_cube(number_of_scrambles, curr.cube)
     plt.show()
     return curr, move_list, moves_by_numbers
-
-
-def ida_solve_cube(curr):
-    time.ctime()
-    fmt = '%H:%M:%S'
-    start = time.strftime(fmt)
-
-    path_to_solution = ida(curr, kurf_h)
-    path_for_gui = translate_path_for_gui(path_to_solution)
-    print("path to solution", path_to_solution)
-
-    time.ctime()
-    end = time.strftime(fmt)
-    print("Calculation time(sec):", datetime.strptime(end, fmt) - datetime.strptime(start, fmt))
-
-    return path_for_gui[::-1]
 
 
 class State:
@@ -141,7 +149,7 @@ def ida(init_state, heuristic):
 
                     curr = curr.parent
                 print("Nodes Generated:", expended_nodes)
-                return path_to_solution
+                return path_to_solution, expended_nodes
 
             b = 0
             expended_nodes = expended_nodes + 12
@@ -271,7 +279,27 @@ def color_heuristic(cube):
             for k in range(cube_size):
                 if cube[i*cube_size+j][k] != color:
                     count += 1
-    return count / cube_size
+    return count / 8
+
+
+def ida_solve_cube(curr, heuristic=sum_divided_by_eight):
+    time.ctime()
+    fmt = '%H:%M:%S'
+    start = time.strftime(fmt)
+
+    path_to_solution, expended_nodes = ida(curr, heuristic)
+    path_for_gui = translate_path_for_gui(path_to_solution)
+    print("path to solution", path_to_solution)
+
+    time.ctime()
+    end = time.strftime(fmt)
+    print("Calculation time(sec):", datetime.strptime(end, fmt) - datetime.strptime(start, fmt))
+
+    return path_for_gui[::-1], expended_nodes
+
+
+
+
 
 # todo: change this array to make it look better
 cube_array = np.array([
@@ -329,4 +357,4 @@ cube_array = np.array([
 # ])
 
 
-run_without_gui()
+run_without_gui(6)
