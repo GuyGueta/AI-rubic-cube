@@ -57,10 +57,17 @@ move_per_num = {1: (('F', 1, 0), "front_clockwise"), 2: (('F', -1, 0), "front_an
                 5: (('D', 1, 0), "down_clockwise"), 6: (('D', -1, 0), "down_anti_clockwise"),
                 7: (('L', 1, 0), "left_clockwise"), 8: (('L', -1, 0), "left_anti_clockwise"),
                 9: (('R', 1, 0), "right_clockwise"), 10: (('R', -1, 0), "right_anti_clockwise"),
-                11: (('B', 1, 0), "back_clockwise"), 12: (('B', -1, 0), "back_anti_clockwise")}
+                11: (('B', 1, 0), "back_clockwise"), 12: (('B', -1, 0), "back_anti_clockwise"),
+                13: (('Z', 1, 0), "deep_front_clockwise"), 14: (('Z', -1, 0), "deep_front_anti_clockwise"),
+                15: (('X', 1, 0), "deep_up_clockwise"), 16: (('X', -1, 0), "deep_up_anti_clockwise"),
+                17: (('C', 1, 0), "deep_down_clockwise"), 18: (('C', -1, 0), "deep_down_anti_clockwise"),
+                19: (('V', 1, 0), "deep_left_clockwise"), 20: (('V', -1, 0), "deep_left_anti_clockwise"),
+                21: (('N', 1, 0), "deep_right_clockwise"), 22: (('N', -1, 0), "deep_right_anti_clockwise"),
+                23: (('M', 1, 0), "deep_back_clockwise"), 24: (('M', -1, 0), "deep_back_anti_clockwise"),
+                }
 
 
-new_action__per_number = {1: 'F', 2: "F'", 3: 'U', 4:"U'", 5: 'D', 6: "D'",
+new_action__per_number = {1: 'F', 2: "F'", 3: 'U', 4: "U'", 5: 'D', 6: "D'",
                           7: 'L', 8: "L'", 9: 'R', 10: "R'", 11: 'B', 12: "B'"}  # to use the same cube as A*
 
 action_map = {'F': 0, 'B': 1, 'U': 2, 'D': 3, 'L': 4, 'R': 5, "F'": 6, "B'": 7, "U'": 8, "D'": 9, "L'": 10, "R'": 11,
@@ -133,9 +140,25 @@ def front_clockwise(x):
     x[cube_size:2*cube_size, cube_size-1] = temp3
 
 
+def deep_front_clockwise(x):
+    temp1 = np.array(x[cube_size-2, 0:cube_size])
+    temp2 = np.array(x[cube_size*3:cube_size*4, 1])
+    temp3 = np.array(x[cube_size*5 + 1, 0:cube_size])
+    temp4 = np.array(x[cube_size:2*cube_size, cube_size-2])
+    x[cube_size-2, 0:cube_size] = np.fliplr([temp4])[0]
+    x[cube_size*3:cube_size*4, 1] = temp1
+    x[cube_size*5 + 1, 0:cube_size] = np.fliplr([temp2])[0]
+    x[cube_size:2*cube_size, cube_size-2] = temp3
+
+
 def front_anti_clockwise(x):
     for _ in range(3):
         front_clockwise(x)
+
+
+def deep_front_anti_clockwise(x):
+    for _ in range(3):
+        deep_front_clockwise(x)
 
 
 def up_cw(x):
@@ -150,9 +173,25 @@ def up_cw(x):
     x[cube_size, 0:cube_size] = temp3
 
 
+def deep_up_cw(x):
+    temp1 = np.array(x[4*cube_size + 1, 0:cube_size])
+    temp2 = np.array(x[3*cube_size + 1, 0:cube_size])
+    temp3 = np.array(x[2*cube_size + 1, 0:cube_size])
+    temp4 = np.array(x[cube_size + 1, 0:cube_size])
+    x[4*cube_size + 1, 0:cube_size] = temp4
+    x[3*cube_size + 1, 0:cube_size] = temp1
+    x[2*cube_size + 1, 0:cube_size] = temp2
+    x[cube_size + 1, 0:cube_size] = temp3
+
+
 def up_anc(x):
     for _ in range(3):
         up_cw(x)
+
+
+def deep_up_anc(x):
+    for _ in range(3):
+        deep_up_cw(x)
 
 
 def down_cw(x):
@@ -167,9 +206,25 @@ def down_cw(x):
     x[cube_size*2-1, 0:cube_size] = temp3
 
 
+def deep_down_cw(x):
+    temp1 = np.array(x[cube_size*3-2, 0:cube_size])
+    temp2 = np.array(x[cube_size*4-2, 0:cube_size])
+    temp3 = np.array(x[cube_size*5-2, 0:cube_size])
+    temp4 = np.array(x[cube_size*2-2, 0:cube_size])
+    x[cube_size*3-2, 0:cube_size] = temp4
+    x[cube_size*4-2, 0:cube_size] = temp1
+    x[cube_size*5-2, 0:cube_size] = temp2
+    x[cube_size*2-2, 0:cube_size] = temp3
+
+
 def down_acw(x):
     for _ in range(3):
         down_cw(x)
+
+
+def deep_down_acw(x):
+    for _ in range(3):
+        deep_down_cw(x)
 
 
 def left_cw(x):
@@ -184,9 +239,25 @@ def left_cw(x):
     x[cube_size*4:cube_size*5, cube_size-1] = np.fliplr([temp3])[0]
 
 
+def deep_left_cw(x):
+    temp1 = np.array(x[0:cube_size, 1])
+    temp2 = np.array(x[cube_size*2:cube_size*3, 1])
+    temp3 = np.array(x[cube_size*5:cube_size*6, 1])
+    temp4 = np.array(x[cube_size*4:cube_size*5, cube_size-2])
+    x[0:cube_size, 1] = np.fliplr([temp4])[0]
+    x[cube_size*2:cube_size*3, 1] = temp1
+    x[cube_size*5:cube_size*6, 1] = temp2
+    x[cube_size*4:cube_size*5, cube_size-2] = np.fliplr([temp3])[0]
+
+
 def left_acw(x):
     for _ in range(3):
         left_cw(x)
+
+
+def deep_left_acw(x):
+    for _ in range(3):
+        deep_left_cw(x)
 
 
 def right_cw(x):
@@ -201,9 +272,25 @@ def right_cw(x):
     x[cube_size*2:cube_size*3, cube_size-1] = temp3
 
 
+def deep_right_cw(x):
+    temp1 = np.array(x[0:cube_size, cube_size-2])
+    temp2 = np.array(x[cube_size*4:cube_size*5, 1])
+    temp3 = np.array(x[cube_size*5:cube_size*6, cube_size-2])
+    temp4 = np.array(x[cube_size*2:cube_size*3, cube_size-2])
+    x[0:cube_size, cube_size-2] = temp4
+    x[cube_size*4:cube_size*5, 1] = np.fliplr([temp1])[0]
+    x[cube_size*5:cube_size*6, cube_size-2] = np.fliplr([temp2])[0]
+    x[cube_size*2:cube_size*3, cube_size-2] = temp3
+
+
 def right_acw(x):
     for _ in range(3):
         right_cw(x)
+
+
+def deep_right_acw(x):
+    for _ in range(3):
+        deep_right_cw(x)
 
 
 def back_cw(x):
@@ -218,15 +305,32 @@ def back_cw(x):
     x[cube_size*3:cube_size*4, cube_size-1] = np.fliplr([temp3])[0]
 
 
+def deep_back_cw(x):
+    temp1 = np.array(x[1, 0:cube_size])
+    temp2 = np.array(x[cube_size:2*cube_size, 1])
+    temp3 = np.array(x[cube_size*6-2, 0:cube_size])
+    temp4 = np.array(x[cube_size*3:cube_size*4, cube_size-2])
+    x[1, 0:cube_size] = temp4
+    x[cube_size:2*cube_size, 1] = np.fliplr([temp1])[0]
+    x[cube_size*6-2, 0:cube_size] = temp2
+    x[cube_size*3:cube_size*4, cube_size-2] = np.fliplr([temp3])[0]
+
+
 def back_acw(x):
     for _ in range(3):
         back_cw(x)
 
 
+def deep_back_acw(x):
+    for _ in range(3):
+        deep_back_cw(x)
+
 
 action_per_move_num = {1: front_clockwise, 2: front_anti_clockwise, 3: up_cw, 4: up_anc, 5: down_cw,
                        6: down_acw, 7: left_cw, 8: left_acw, 9: right_cw, 10: right_acw, 11: back_cw,
-                       12: back_acw}
+                       12: back_acw, 13: deep_front_clockwise, 14: deep_front_anti_clockwise,
+                       15: deep_up_cw, 16: deep_up_anc, 17: deep_down_cw, 18: deep_down_acw, 19: deep_left_cw,
+                       20: deep_left_acw, 21: deep_right_cw, 22: deep_right_acw, 23: deep_back_cw, 24: deep_back_acw}
 
 
 # helper function for the reinforcement learning:

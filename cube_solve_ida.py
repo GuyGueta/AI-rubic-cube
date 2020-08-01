@@ -1,7 +1,7 @@
 from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
     PrintCube, print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
-
+from group_theory_solution import solve_with_group_theory
 from datetime import datetime
 import time
 from plot_results import *
@@ -59,6 +59,11 @@ def run_without_gui(number_of_scrambles=6, from_file=None):
 
     print("reinforcement learning solution")
     sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+
+    print("Group theory solution:")
+    group_theory_solution = solve_with_group_theory(curr)
+    print("number of steps: ", len(group_theory_solution))
+    print("path to solution: ", group_theory_solution)
 
     expanded_nodes(heuristic, expended_nodes_list)
 

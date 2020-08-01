@@ -1,7 +1,8 @@
 from rubik_solver import utils
-from rubik_solver.Cubie import Cubie
+# from cube_solve_ida import State
+from cube_utils import basic_cube, np, PrintCube, print_cube_per_size
 
-from cube_interactive import *
+# from cube_interactive import *
 
 # str_cube_example = 'wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby'
 # 3 solvers for the cube: 'Beginner', 'CFOP', 'Kociemba'. To solve use - utils.solve(str_cube_example, 'Kociemba')
@@ -25,38 +26,48 @@ group_theory_q_learn_mapping_dict = {(-1, -1, 1): (6, 11, 18), (-1, 0, 1): (3, 1
                                      }
 
 
-def from_str_to_cubie(cube_str):
-    cube_list = [char for char in cube_str]
-    cube_list.append(None)
-    cube = []
-    for i in range(3):
-        for j in range(3):
-            for k in range(3):
-                if i == 1 and j == 1 and k == 1:
-                    continue
-                FB_color_idx, LR_color_idx, UD_color_idx = group_theory_q_learn_mapping_dict[(i - 1, j - 1, k - 1)]
-                FB_color, LR_color, UD_color = cube_list[FB_color_idx], cube_list[LR_color_idx], cube_list[UD_color_idx]
-                if FB_color is not None:
-                    FB_color = FB_color.upper()
-                if LR_color is not None:
-                    LR_color = LR_color.upper()
-                if UD_color is not None:
-                    UD_color = UD_color.upper()
-                cube.append(Cubie(i - 1, j - 1, k - 1, FB_color, UD_color, LR_color))
-    return State(3, cube)
+# def from_str_to_cubie(cube_str):
+#     cube_list = [char for char in cube_str]
+#     cube_list.append(None)
+#     cube = []
+#     for i in range(3):
+#         for j in range(3):
+#             for k in range(3):
+#                 if i == 1 and j == 1 and k == 1:
+#                     continue
+#                 FB_color_idx, LR_color_idx, UD_color_idx = group_theory_q_learn_mapping_dict[(i - 1, j - 1, k - 1)]
+#                 FB_color, LR_color, UD_color = cube_list[FB_color_idx], cube_list[LR_color_idx], cube_list[UD_color_idx]
+#                 if FB_color is not None:
+#                     FB_color = FB_color.upper()
+#                 if LR_color is not None:
+#                     LR_color = LR_color.upper()
+#                 if UD_color is not None:
+#                     UD_color = UD_color.upper()
+#                 cube.append(Cubie(i - 1, j - 1, k - 1, FB_color, UD_color, LR_color))
+#     return State(3, cube)
+
+
+# def from_cube_to_str(cube):
+#     cube_str_lst = 55 * [None]
+#     for cubie in cube.cube:
+#         x, y, z, FB_color, LR_color, UD_color = cubie.x, cubie.y, cubie.z, cubie.FB_color, cubie.LR_color, cubie.UD_color
+#         FB_color_idx, LR_color_idx, UD_color_idx = group_theory_q_learn_mapping_dict[(x, y, z)]
+#         cube_str_lst[FB_color_idx] = FB_color
+#         cube_str_lst[LR_color_idx] = LR_color
+#         cube_str_lst[UD_color_idx] = UD_color
+#     cube_str_lst = cube_str_lst[0:-1]
+#     cube_str = "".join(cube_str_lst).lower()
+#     return cube_str
 
 
 def from_cube_to_str(cube):
-    cube_str_lst = 55 * [None]
-    for cubie in cube.cube:
-        x, y, z, FB_color, LR_color, UD_color = cubie.x, cubie.y, cubie.z, cubie.FB_color, cubie.LR_color, cubie.UD_color
-        FB_color_idx, LR_color_idx, UD_color_idx = group_theory_q_learn_mapping_dict[(x, y, z)]
-        cube_str_lst[FB_color_idx] = FB_color
-        cube_str_lst[LR_color_idx] = LR_color
-        cube_str_lst[UD_color_idx] = UD_color
-    cube_str_lst = cube_str_lst[0:-1]
+    cube_str_lst = []
+    for row in cube.cube:
+        cube_str_lst += row.tolist()
     cube_str = "".join(cube_str_lst).lower()
     return cube_str
+
+
 
 
 def actions_from_group_theory_to_q_learn(group_theory_actions):
@@ -79,5 +90,12 @@ def solve_with_group_theory(cube):
     return actions_from_group_theory_to_q_learn(utils.solve(from_cube_to_str(cube), 'Kociemba'))
 
 
-print(from_str_to_cubie('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby'))
-print(utils.solve('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby', 'Kociemba'))
+# print(from_str_to_cubie('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby'))
+# print(utils.solve('wowgybwyogygybyoggrowbrgywrborwggybrbwororbwborgowryby', 'Kociemba'))
+
+# curr = State()
+# curr.cube = np.array(basic_cube)
+# strr = from_cube_to_str(curr)
+# print(strr)
+# print_cube_per_size(curr.cube)
+# move_list, moves_by_numbers = create_cube(number_of_scrambles, curr.cube)
