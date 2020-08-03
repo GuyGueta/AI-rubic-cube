@@ -5,7 +5,7 @@ from collections import Counter
 from random import choice
 
 cube_by_color = []
-cube_size = 3
+cube_size = 4
 for color in ['W', 'B', 'R', 'G', 'O', 'Y']:
     sub_list = [color] * cube_size
     for j in range(cube_size):

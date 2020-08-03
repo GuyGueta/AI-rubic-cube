@@ -2,7 +2,7 @@ from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_
     PrintCube, print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
 
-from group_theory_solution import solve_with_group_theory
+#from group_theory_solution import solve_with_group_theory
 from datetime import datetime
 import time
 from plot_results import *
@@ -39,10 +39,10 @@ def run_without_gui(number_of_scrambles=6, from_file=None):
     expended_nodes_list = []
     heuristic = []
     print("corner edge sum max:")
-    sol_corner_edge_sum_max, expended_nodes = ida_solve_cube(curr, corner_edge_sum_max)
-    heuristic.append("corner edge sum max")
-    expended_nodes_list.append(expended_nodes)
-    print("sum divided by eight solution:")
+    # sol_corner_edge_sum_max, expended_nodes = ida_solve_cube(curr, corner_edge_sum_max)
+    # heuristic.append("corner edge sum max")
+    # expended_nodes_list.append(expended_nodes)
+    # print("sum divided by eight solution:")
     sol_sum_divided_by_eight, expended_nodes = ida_solve_cube(curr, sum_divided_by_eight)
     heuristic.append("sum divided by eight")
     expended_nodes_list.append(expended_nodes)
@@ -55,12 +55,12 @@ def run_without_gui(number_of_scrambles=6, from_file=None):
     heuristic.append("colors")
     expended_nodes_list.append(expended_nodes)
     print("reinforcement learning solution")
-    sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+   # sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
 
     print("Group theory solution:")
-    group_theory_solution = solve_with_group_theory(curr)
-    print("number of steps: ", len(group_theory_solution))
-    print("path to solution: ", group_theory_solution)
+    #group_theory_solution = solve_with_group_theory(curr)
+    # print("number of steps: ", len(group_theory_solution))
+    # print("path to solution: ", group_theory_solution)
 
     expanded_nodes(heuristic, expended_nodes_list)
 
@@ -78,6 +78,7 @@ class State:
     h = 0
     parent = None
     move = None
+    centers = {}
 
 
 def goal_reached(curr):
@@ -143,12 +144,15 @@ def ida(init_state, heuristic, is3on3=True):
     #     # ^^ endless loop ^^^
     #
 
-    init_state.h = heuristic(init_state, is3on3)
+
     if is3on3:
         actions_len = 12
     else:
         actions_len = 24
-
+        init_state.centers = find_centers_for_cube(init_state.cube)
+    init_state.h = heuristic(init_state, is3on3)
+    print(init_state.h)
+    print("########################################################################################")
     cost_limit = init_state.h
     expended_nodes = 0
     frontier = list()
@@ -163,7 +167,8 @@ def ida(init_state, heuristic, is3on3=True):
 
             if goal_reached(curr):
                 print('Goal Height:', curr.g)
-                print('Branching Factor:', sum(branching_factors)/len(branching_factors))
+                if len(branching_factors) != 0:
+                    print('Branching Factor:', sum(branching_factors)/len(branching_factors))
                 while curr is not None:
                     if curr.move is not None:
                         path_to_solution.append(curr.move)
@@ -180,7 +185,10 @@ def ida(init_state, heuristic, is3on3=True):
                 new.g = curr.g + 1
                 new.parent = curr
                 new.move = perform_move(new.cube, i + 1, 0)[1]
+                if not is3on3:
+                    new.centers = init_state.centers
                 new.h = heuristic(new, is3on3)
+                print(new.h)
                 if new.g + new.h > cost_limit:
                     if minimum is None or new.g + new.h < minimum:
                         minimum = new.g + new.h
@@ -240,12 +248,10 @@ def calc_center_index(index, cube, border_color_dict):
             border_start = CUBE_BORDER_INDEX_4[num]
             border_index = num
             break
-    max_color_index = find_max_color(border_start, cube)
-    border_color_dict[border_index] = CUBE_CENTERS_DICT_4[max_color_index]
+    max_color = find_max_color(border_start, cube)
+    border_color_dict[border_index] = CUBE_CENTERS_DICT_4[max_color]
 
 def find_max_color(border_start, cube):
-
-    # TODO - endless loop!!!!!!!!!!!!!!!!!!!!!!!!!!!
     counter_dict = {'W': 0, 'B': 0, 'R': 0, 'G': 0, 'O': 0, 'Y': 0}
     for i in range(border_start, border_start + 4):
         for j in range(4):
@@ -537,4 +543,4 @@ cube_array_4 = np.array([
     [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2]],  # 2 center + 2 edge
     [[0, 3, 3], [1, 3, 3], [2, 3, 3], [3, 3, 3]],  # 2 corners + 2 edge
 ])
-run_without_gui(6)
+run_without_gui(2)
