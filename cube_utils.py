@@ -95,12 +95,14 @@ def perform_move(x, move, print_cube=False):
 
 
 def translate_path_for_gui(path):
-    gui_path = []
-    for move in path:
-        gui_path.append(move_dict[move])
+    if cube_size == 3:
 
-    return gui_path
+        gui_path = []
+        for move in path:
+            gui_path.append(move_dict[move])
 
+        return gui_path
+    return [None]
 
 def create_cube(total_move, init_cube):
     """
@@ -110,7 +112,10 @@ def create_cube(total_move, init_cube):
     """
     print_cube_per_size(init_cube)
     # PrintCube_per_size(init_cube)
-    randoms_num_for_moves = [randint(1, 12) for x in range(total_move)]
+    if cube_size == 4:
+        randoms_num_for_moves = [randint(1, 24) for x in range(total_move)]
+    else:
+        randoms_num_for_moves = [randint(1, 12) for x in range(total_move)]
     print(randoms_num_for_moves)
     for num in randoms_num_for_moves:
         print(move_per_num[num][1])
