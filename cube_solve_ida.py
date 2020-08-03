@@ -38,31 +38,31 @@ def run_without_gui(number_of_scrambles=6, from_file=None):
         curr, move_list, moves_by_numbers = init_cube(number_of_scrambles)
     expended_nodes_list = []
     heuristic = []
-    # print("corner edge sum max:")
-    # sol_corner_edge_sum_max, expended_nodes = ida_solve_cube(curr, corner_edge_sum_max)
-    # heuristic.append("corner edge sum max")
-    # expended_nodes_list.append(expended_nodes)
-    # print("sum divided by eight solution:")
-    # sol_sum_divided_by_eight, expended_nodes = ida_solve_cube(curr, sum_divided_by_eight)
-    # heuristic.append("sum divided by eight")
-    # expended_nodes_list.append(expended_nodes)
-    # print("korf solution:")
-    # sol_kurf, expended_nodes = ida_solve_cube(curr, kurf_h)
-    # heuristic.append("korf")
-    # expended_nodes_list.append(expended_nodes)
+    print("corner edge sum max:")
+    sol_corner_edge_sum_max, expended_nodes = ida_solve_cube(curr, corner_edge_sum_max)
+    heuristic.append("corner edge sum max")
+    expended_nodes_list.append(expended_nodes)
+    print("sum divided by eight solution:")
+    sol_sum_divided_by_eight, expended_nodes = ida_solve_cube(curr, sum_divided_by_eight)
+    heuristic.append("sum divided by eight")
+    expended_nodes_list.append(expended_nodes)
+    print("korf solution:")
+    sol_kurf, expended_nodes = ida_solve_cube(curr, kurf_h)
+    heuristic.append("korf")
+    expended_nodes_list.append(expended_nodes)
     print("colors solution:")
     sol_colors, expended_nodes = ida_solve_cube(curr, color_heuristic)
-    # heuristic.append("colors")
-    # expended_nodes_list.append(expended_nodes)
-    # print("reinforcement learning solution")
-    # sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
-    #
-    # print("Group theory solution:")
-    # group_theory_solution = solve_with_group_theory(curr)
-    # print("number of steps: ", len(group_theory_solution))
-    # print("path to solution: ", group_theory_solution)
-    #
-    # expanded_nodes(heuristic, expended_nodes_list)
+    heuristic.append("colors")
+    expended_nodes_list.append(expended_nodes)
+    print("reinforcement learning solution")
+    sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+
+    print("Group theory solution:")
+    group_theory_solution = solve_with_group_theory(curr)
+    print("number of steps: ", len(group_theory_solution))
+    print("path to solution: ", group_theory_solution)
+
+    expanded_nodes(heuristic, expended_nodes_list)
 
 def init_cube(number_of_scrambles=7):
     N = 3
@@ -287,6 +287,7 @@ def manhattan_distance_3(cube, i, z, corner):
 """ for every cubie in the cube, the algorithm checks is color, goes to the border of that color in the initial cube 
  and and calculate the Manhatten dist by the numbers ( its the cord from 0- 2 in the border) from the border in the 
  current cube """
+
 def corner_edge_sum_max(state, is_3on3=True):
     corners = 0
     edges = 0
