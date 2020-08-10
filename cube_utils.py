@@ -4,8 +4,9 @@ import pycuber as pc
 from collections import Counter
 from random import choice
 
+cube_size = 3
+
 cube_by_color = []
-cube_size = 4
 for color in ['W', 'B', 'R', 'G', 'O', 'Y']:
     sub_list = [color] * cube_size
     for j in range(cube_size):
@@ -387,8 +388,6 @@ def gen_sample(n_steps=6):
     transformation = [choice(list(action_map.keys())) for _ in range(n_steps)]
     print(transformation)
 
-
-    # todo - ^^^ this is the scramble actions. need to create a dict
     my_formula = pc.Formula(transformation)
 
     cube(my_formula)
@@ -407,8 +406,6 @@ def gen_sample(n_steps=6):
 
     return sample_X, sample_Y, cubes
 
-# todo - i add this lines to create a cube:
-
 
 def gen_sample_2(move_list, n_steps=6):
     cube = pc.Cube()
@@ -417,8 +414,6 @@ def gen_sample_2(move_list, n_steps=6):
         transformation.append(new_action__per_number[act])
     # transformation = [choice(list(action_map.keys())) for _ in range(n_steps)]
     print(transformation)
-
-    # todo - ^^^ this is the scramble actions. need to create a dict
     my_formula = pc.Formula(transformation)
 
     cube(my_formula)
@@ -472,6 +467,7 @@ def get_all_possible_actions_cube_small(cube):
         rewards.append(2*int(perc_solved_cube(cube_copy)>0.99)-1)
 
     return flat_cubes, rewards
+
 
 def chunker(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))

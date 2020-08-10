@@ -1,8 +1,8 @@
 from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_move, save_cube,\
-    PrintCube, print_cube_per_size, cube_size
+    print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
 
-#from group_theory_solution import solve_with_group_theory
+from group_theory_solution import solve_with_group_theory
 from datetime import datetime
 import time
 from plot_results import *
@@ -55,23 +55,26 @@ def run_without_gui(number_of_scrambles=6, from_file=None):
     sol_colors, expended_nodes = ida_solve_cube(curr, color_heuristic)
     heuristic.append("colors")
     expended_nodes_list.append(expended_nodes)
-    # print("reinforcement learning solution")
-   # sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
 
-    print("Group theory solution:")
-    #group_theory_solution = solve_with_group_theory(curr)
-    # print("number of steps: ", len(group_theory_solution))
-    # print("path to solution: ", group_theory_solution)
+    if cube_size == 3:
+        print("reinforcement learning solution")
+        sol_reinforcement_learning = solve_reinforcement_learning(moves_by_numbers)
+        print("Group theory solution:")
+        group_theory_solution = solve_with_group_theory(curr)
+        print("number of steps: ", len(group_theory_solution))
+        print("path to solution: ", group_theory_solution)
 
     expanded_nodes(heuristic, expended_nodes_list)
 
-def init_cube(number_of_scrambles=7):
+
+def init_cube(number_of_scrambles=6):
     N = 3
     curr = State()
     curr.cube = np.array(basic_cube)
     move_list, moves_by_numbers = create_cube(number_of_scrambles, curr.cube)
     plt.show()
     return curr, move_list, moves_by_numbers
+
 
 class State:
     cube = None
@@ -89,11 +92,9 @@ def goal_reached(curr):
     :param curr: current state
     :return: true if we reached the goal, else False
     """
-    # if curr.h == 1.5:
-    #     x = 3
+
     if curr.h != 0:
         return False
-
 
     # goal was reached, save it:
     try:
@@ -126,8 +127,6 @@ def check_repeat_frontier(state, frontier):
         if np.array_equal(curr.cube, state):
             return True
     return False
-
-
 
 
 def ida(init_state, heuristic, is3on3=True):
@@ -199,7 +198,6 @@ def manhattan_distance(cube, i, z, corner, is_3on3=True):
         return manhattan_distance_4(cube, i, z, corner)
 
 
-
 def manhattan_distance_center(state, i, z):
     cube = state.cube
     centers_dict = state.centers
@@ -235,7 +233,6 @@ def manhattan_distance_4(state, i, z, corner):
         for c2 in c2_list:
             d.append(calculate_distance(c1, c2))
         return min(d)
-
 
 
 def get_center(index):
@@ -301,10 +298,6 @@ def manhattan_distance_3(cube, i, z, corner):
 
         return min(d)
 
-
-""" for every cubie in the cube, the algorithm checks is color, goes to the border of that color in the initial cube 
- and and calculate the Manhatten dist by the numbers ( its the cord from 0- 2 in the border) from the border in the 
- current cube """
 
 def corner_edge_sum_max(state, is_3on3=True):
     corners = 0
@@ -400,32 +393,6 @@ def sum_divided_by_eight(state, is_3on3=True):
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
         return (corners + edges + centers) / 8
 
-# def get_common_color(cube):
-#     colors = {'W', 'B', 'R', 'G', 'O', 'Y'}
-#     chosen_colors = []
-#     for i in range(6):
-#         colors_in = {}
-#         for j in range(cube_size):
-#             for k in range(cube_size):
-#                 colors_in[cube.cube[i*cube_size+j][k]] = colors_in.get(cube.cube[i*cube_size+j][k], 0) +1
-#         s = sorted(colors_in, key=colors_in.get)
-#         p = 0
-#         while p < len(colors_in.keys()):
-#             c = s[p]
-#             if c[0] in colors:
-#                 chosen_colors.append(c[0])
-#                 colors.remove(c[0])
-#                 break
-#             else:
-#                 p+=1
-#         if len(chosen_colors) < i-1:
-#             chosen_colors.append("non")
-#
-#     for m in range(6):
-#         if m == "non":
-#             chosen_colors[m] = colors.pop()
-#     return chosen_colors
-
 
 def color_heuristic(cube, is3on3=True):
     """
@@ -485,31 +452,8 @@ cube_array = np.array([
     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
 ])
-# cube_array_4 = np.array([
-#     [0, 0, 3], [1, 0, 3], [2, 0, 3], [3, 0, 3],
-#      [0, 0, 2], [1, 0, 2], [2, 0, 2], [3, 0, 2],
-#      [[0, 0, 1], [1, 0, 1], [2, 0, 1], [3, 0, 1],
-#     [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]],
-#
-#     [[0, 0, 2], [0, 1, 2], [0, 2, 2]],  # 2 corners + 1 edge
-#     [[0, 0, 1], [0, 1, 1], [0, 2, 1]],  # center + 2 edge
-#     [[0, 0, 0], [0, 1, 0], [0, 2, 0]],  # 2 corners + 1 edge
-#
-#     [[0, 0, 0], [1, 0, 0], [2, 0, 0]],  # 2 corners + 1 edge
-#     [[0, 1, 0], [1, 1, 0], [2, 1, 0]],  # center + 2 edge
-#     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
-#
-#     [[2, 0, 0], [2, 0, 1], [2, 0, 2]],  # 2 corners + 1 edge
-#     [[2, 1, 0], [2, 1, 1], [2, 1, 2]],  # center + 2 edge
-#     [[2, 2, 0], [2, 2, 1], [2, 2, 2]],  # 2 corners + 1 edge
-#
-#     [[2, 0, 2], [1, 0, 2], [0, 0, 2]],  # 2 corners + 1 edge
-#     [[2, 1, 2], [1, 1, 2], [0, 1, 2]],  # center + 2 edge
-#     [[2, 2, 2], [1, 2, 2], [0, 2, 2]],  # 2 corners + 1 edge
-#     [[0, 2, 0], [1, 2, 0], [2, 2, 0]],  # 2 corners + 1 edge
-#     [[0, 2, 1], [1, 2, 1], [2, 2, 1]],  # center + 2 edge
-#     [[0, 2, 2], [1, 2, 2], [2, 2, 2]],  # 2 corners + 1 edge
-# ])
+
+
 cube_array_4 = np.array([
     # W 0
     [[0, 0, 3], [1, 0, 3], [2, 0, 3], [3, 0, 3]],  # 2 corners + 2 edge
@@ -542,4 +486,4 @@ cube_array_4 = np.array([
     [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2]],  # 2 center + 2 edge
     [[0, 3, 3], [1, 3, 3], [2, 3, 3], [3, 3, 3]],  # 2 corners + 2 edge
 ])
-run_without_gui(3)
+run_without_gui(2)

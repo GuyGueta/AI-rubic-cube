@@ -68,8 +68,6 @@ def from_cube_to_str(cube):
     return cube_str
 
 
-
-
 def actions_from_group_theory_to_q_learn(group_theory_actions):
     q_learn_actions = []
     for action in group_theory_actions:
