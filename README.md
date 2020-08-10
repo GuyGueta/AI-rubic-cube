@@ -30,5 +30,14 @@ inside the function "_create_problem_cube" (in the first row).
 ##### Important note 2
 the 4*4 cube solved only by the printed version.
 
-
-
+## files in the projects:
+- cube_solve_ida.py - Main file, create the rubik's cube and solve it.
+- cube_utils.py - Organizes all the utilities of the cube - the structure of the cube, actions, etc. 
+- group_theory_solution.py - group theory solution implementation. 
+- reinforcement_learning_learner.py
+- reinforcement_learning_solver.py
+- weights.h5 - weights of the RL solution after learning.
+- cube_interactive.py - GUI
+- projection.py - GUI helper
+- plot_results.py - create graphs for results
+- input1.txt, output.txt - files for input and output of the gui.
