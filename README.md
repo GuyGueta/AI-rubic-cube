@@ -5,7 +5,7 @@ To run the project there are 2 options:
 1. run in the printed version (recommended)
 2. run the GUI version.
 
-to change the size of the cube, change the "cube_size" parameters in cube_utils.py to 
+to change the size of the cube, change the "cube_size" parameter in cube_utils.py to 
 the chosen size. default is 3.
 
 ## option 1: printed version:
