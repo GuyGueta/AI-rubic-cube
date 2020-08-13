@@ -2,7 +2,7 @@ from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_
     print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
 
-# from group_theory_solution import solve_with_group_theory
+from group_theory_solution import solve_with_group_theory
 from datetime import datetime
 import time
 from plot_results import *
