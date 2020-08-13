@@ -2,7 +2,7 @@ from cube_utils import create_cube, basic_cube, translate_path_for_gui, perform_
     print_cube_per_size, cube_size
 from reinforcement_learning_solver import *
 
-from group_theory_solution import solve_with_group_theory
+# from group_theory_solution import solve_with_group_theory
 from datetime import datetime
 import time
 from plot_results import *
@@ -260,6 +260,7 @@ def calc_center_index(index, cube, border_color_dict,  is_colored_dict):
     max_color = find_max_color(border_start, cube, is_colored_dict)
     border_color_dict[max_color] = get_center(index)
 
+
 def find_max_color(border_start, cube,  is_colored_dict):
     counter_dict = {'W': 0, 'B': 0, 'R': 0, 'G': 0, 'O': 0, 'Y': 0}
     for i in range(border_start, border_start + 4):
@@ -325,7 +326,7 @@ def corner_edge_sum_max(state, is_3on3=True):
                 else:
                     manhattan_distance(state, i, 3, False, False) +  manhattan_distance(state, i + 1, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return max((corners + centers) / 16, (edges + centers) / 12)
+        return max((corners + centers) / 16, (edges + centers) / 16)
 
 
 def kurf_h(state, is_3on3=True):
@@ -362,7 +363,7 @@ def kurf_h(state, is_3on3=True):
                 else:
                     edges_2 = edges_2 + manhattan_distance(state, i, 0, False, False) + manhattan_distance(state, i, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return max((corners + centers) / 12, (edges_1 + centers) / 12, (edges_2 + centers) / 12)
+        return max((corners + centers) / 16, (edges_1 + centers) / 16, (edges_2 + centers) / 16)
 
 
 def sum_divided_by_eight(state, is_3on3=True):
@@ -391,7 +392,7 @@ def sum_divided_by_eight(state, is_3on3=True):
                 else:
                     edges = edges + manhattan_distance(state, i, 0, False, False) + manhattan_distance(state, i, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return (corners + edges + centers) / 12
+        return (corners + edges + centers) / 16
 
 
 def color_heuristic(cube, is3on3=True):
@@ -486,4 +487,4 @@ cube_array_4 = np.array([
     [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2]],  # 2 center + 2 edge
     [[0, 3, 3], [1, 3, 3], [2, 3, 3], [3, 3, 3]],  # 2 corners + 2 edge
 ])
-run_without_gui(6)
+run_without_gui(5)
