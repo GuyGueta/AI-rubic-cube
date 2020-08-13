@@ -325,7 +325,7 @@ def corner_edge_sum_max(state, is_3on3=True):
                 else:
                     manhattan_distance(state, i, 3, False, False) +  manhattan_distance(state, i + 1, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return max((corners + centers) / 12, (edges + centers) / 8)
+        return max((corners + centers) / 16, (edges + centers) / 12)
 
 
 def kurf_h(state, is_3on3=True):
@@ -362,7 +362,7 @@ def kurf_h(state, is_3on3=True):
                 else:
                     edges_2 = edges_2 + manhattan_distance(state, i, 0, False, False) + manhattan_distance(state, i, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return max((corners + centers) / 8, (edges_1 + centers) / 8, (edges_2 + centers) / 8)
+        return max((corners + centers) / 12, (edges_1 + centers) / 12, (edges_2 + centers) / 12)
 
 
 def sum_divided_by_eight(state, is_3on3=True):
@@ -391,7 +391,7 @@ def sum_divided_by_eight(state, is_3on3=True):
                 else:
                     edges = edges + manhattan_distance(state, i, 0, False, False) + manhattan_distance(state, i, 3, False, False)
                     centers = centers + manhattan_distance_center(state, i, 1) + manhattan_distance_center(state, i, 2)
-        return (corners + edges + centers) / 8
+        return (corners + edges + centers) / 12
 
 
 def color_heuristic(cube, is3on3=True):
@@ -412,7 +412,7 @@ def color_heuristic(cube, is3on3=True):
             for k in range(cube_size):
                 if cube[i*cube_size+j][k] != color:
                     count += 1
-    return count / 8
+    return count / (2*cube_size+2)
 
 
 def ida_solve_cube(curr, heuristic=sum_divided_by_eight):
@@ -486,4 +486,4 @@ cube_array_4 = np.array([
     [[0, 3, 2], [1, 3, 2], [2, 3, 2], [3, 3, 2]],  # 2 center + 2 edge
     [[0, 3, 3], [1, 3, 3], [2, 3, 3], [3, 3, 3]],  # 2 corners + 2 edge
 ])
-run_without_gui(2)
+run_without_gui(6)
